@@ -61,6 +61,11 @@ def run_tornado_server(port=8090):
     IOLoop.instance().start()
 
 
+def register_blueprints():
+    from pytheas.views import home_views
+    app.register_blueprint(home_views.blueprint)
+
+
 def main():
     server = os.environ.get('SERVER', 'cherrypy')
     port = int(os.environ.get('FLASK_PORT', 8090))
@@ -68,8 +73,8 @@ def main():
     debug = env == 'development'
     app.config.from_object(config[env])
     app.config.from_mapping(**dict(os.environ))
-    print(app.config)
     prepare_config(debug)
+    register_blueprints()
     if server == 'cherrypy':
         run_cherrypy_server(port=port)
     elif server == 'tornado':
