@@ -1,0 +1,8 @@
+apscheduler
+Flask
+cherrypy
+flask_script
+paste
+tornado
+loguru
+python-dotenv
