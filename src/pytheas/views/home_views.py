@@ -1,5 +1,6 @@
 import flask
 
+from pytheas import service
 from pytheas.utils.view_modifiers import response
 from pytheas.viewmodels.home_viewmodel import HomeViewModel
 
@@ -22,5 +23,6 @@ def config_post():
     vm.validate()
     if vm.error:
         return vm.to_dict()
+    service.save_corpus_path(vm.corpus_path)
     resp = flask.redirect('/review')
     return resp

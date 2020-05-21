@@ -1,5 +1,19 @@
 {% extends "base.html" %}
 {% block title %}Review{% endblock %}
 {% block body %}
+    <form action="" method="POST" class="account-form">
+        <h1>Regular Expressiosn</h1>
 
+        <input name="new_regex" type="text" placeholder=" Add New Regex" class="form-control"
+               value="{{ new_regex }}">
+        <button type="submit" class="btn btn-danger">Add Regex</button>
+        <div style="clear: both;"></div>
+
+        {% for regex in regexes %}
+            <div class="info-msg">{{ regex }}</div>
+        {% endfor %}
+        {% if error %}
+            <div class="error-msg">{{ error }}</div>
+        {% endif %}
+    </form>
 {% endblock %}
