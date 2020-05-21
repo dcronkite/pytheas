@@ -21,10 +21,7 @@ def review_post():
     vm = ReviewViewModel()
     if vm.new_regex:
         service.add_regex(vm.new_regex)
-        vm.reset()
-        return vm.to_dict()
     elif vm.remove_regex:
         service.remove_regex(vm.remove_regex)
-        vm.reset()
-        return vm.to_dict()
+    vm.reset()
     return vm.to_dict()

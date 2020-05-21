@@ -11,7 +11,7 @@ def get_regexes():
 
 
 def remove_regex(regex: str):
-    session.setdefault('regexes', []).remove(regex)
+    session['regexes'] = list(filter(lambda r: r != regex, session.get('regexes', [])))
 
 
 def save_corpus_path(corpus_path: str):

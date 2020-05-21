@@ -11,4 +11,5 @@ class ReviewViewModel(ViewModelBase):
 
     def reset(self):
         self.new_regex = ''
+        self.remove_regex = None
         self.regexes = service.get_regexes()
