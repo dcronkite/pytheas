@@ -7,6 +7,8 @@ class ReviewViewModel(ViewModelBase):
         super().__init__()
         self.regexes = service.get_regexes()
         self.new_regex = self.request_dict.new_regex
+        self.remove_regex = self.request_dict.remove
 
     def reset(self):
         self.new_regex = ''
+        self.regexes = service.get_regexes()

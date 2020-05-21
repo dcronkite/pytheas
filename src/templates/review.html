@@ -10,7 +10,7 @@
         <div style="clear: both;"></div>
 
         {% for regex in regexes %}
-            <div class="info-msg">{{ regex }}</div>
+            <button class="btn-info" type="submit" name="remove" value="{{ regex }}">{{ regex }}</button>
         {% endfor %}
         {% if error %}
             <div class="error-msg">{{ error }}</div>

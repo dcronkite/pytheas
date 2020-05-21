@@ -1,15 +1,23 @@
 {% extends "base.html" %}
 {% block title %}Configure{% endblock %}
 {% block body %}
-        <form action="" method="POST" class="account-form">
-            <h1>Choose Corpus Directory</h1>
+    <form action="" method="POST" class="account-form">
+        <h1>Choose Corpus Directory</h1>
 
-            <input name="corpus_path" type="text" placeholder=" Corpus Directory" class="form-control" value="{{ corpus_path }}">
-            <button type="submit" class="btn btn-danger">Review</button>
-            <div style="clear: both;"></div>
+        <input name="corpus_path" type="text" placeholder=" Corpus Directory" class="form-control"
+               value="{{ corpus_path }}">
+        <button type="submit" class="btn btn-danger">Review</button>
+        <div style="clear: both;"></div>
 
-            {% if error %}
-                <div class="error-msg">{{ error }}</div>
-            {% endif %}
-        </form>
+        <fieldset>
+            <select id="previous_corpus_path" name="previous_corpus_path">
+                {% for cpath in previous_corpus_paths %}
+                    <option value="{{ cpath }}">{{ cpath }}</option>
+                {% endfor %}
+            </select>
+        </fieldset>
+        {% if error %}
+            <div class="error-msg">{{ error }}</div>
+        {% endif %}
+    </form>
 {% endblock %}

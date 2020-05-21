@@ -1,12 +1,27 @@
+from flask import session
+
+
 def add_regex(regex: str):
-    return regex
+    session['new_regex'] = regex
+    session.setdefault('regexes', []).append(regex)
 
 
 def get_regexes():
-    return [
-        'this', 'is', 'a', 'test'
-    ]
+    return session.setdefault('regexes', [])
+
+
+def remove_regex(regex: str):
+    session.setdefault('regexes', []).remove(regex)
 
 
 def save_corpus_path(corpus_path: str):
-    return corpus_path
+    session['corpus_path'] = corpus_path
+    session.setdefault('previous_corpus_paths', []).append(corpus_path)
+
+
+def get_corpus_path():
+    return session.get('corpus_path', '')
+
+
+def get_previous_corpus_paths():
+    return set(session.setdefault('previous_corpus_paths', []))
