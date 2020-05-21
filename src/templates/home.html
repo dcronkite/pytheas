@@ -1,10 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Configure</title>
-</head>
-<body>
+{% extends "base.html" %}
+{% block title %}Configure{% endblock %}
+{% block body %}
+        <form action="" method="POST" class="account-form">
+            <h1>Choose Corpus Directory</h1>
 
-</body>
-</html>
+            <input name="corpus_path" type="text" placeholder=" Corpus Directory" class="form-control" value="{{ corpus_path }}">
+            <button type="submit" class="btn btn-danger">Review</button>
+            <div style="clear: both;"></div>
+
+            {% if error %}
+                <div class="error-msg">{{ error }}</div>
+            {% endif %}
+        </form>
+{% endblock %}

@@ -63,7 +63,10 @@ def run_tornado_server(port=8090):
 
 def register_blueprints():
     from pytheas.views import home_views
+    from pytheas.views import review_views
+
     app.register_blueprint(home_views.blueprint)
+    app.register_blueprint(review_views.blueprint)
 
 
 def main():
