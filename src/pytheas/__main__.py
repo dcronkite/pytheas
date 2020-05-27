@@ -17,6 +17,8 @@ from paste.translogger import TransLogger
 
 import dotenv
 
+from pytheas.data import mongo_setup
+
 dotenv.load_dotenv('../.env')
 
 
@@ -61,6 +63,10 @@ def run_tornado_server(port=8090):
     IOLoop.instance().start()
 
 
+def setup_db():
+    mongo_setup.global_init()  # TODO get username/password
+
+
 def register_blueprints():
     from pytheas.views import home_views
     from pytheas.views import review_views
@@ -77,6 +83,7 @@ def main():
     app.config.from_object(config[env])
     app.config.from_mapping(**dict(os.environ))
     prepare_config(debug)
+    setup_db()
     register_blueprints()
     if server == 'cherrypy':
         run_cherrypy_server(port=port)

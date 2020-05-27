@@ -6,3 +6,4 @@ paste
 tornado
 loguru
 python-dotenv
+mongoengine
