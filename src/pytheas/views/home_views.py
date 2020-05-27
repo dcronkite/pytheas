@@ -23,6 +23,6 @@ def config_post():
     vm.validate()
     if vm.error:
         return vm.to_dict()
-    service.save_corpus_path(vm.corpus_path)
+    service.save_corpus_path(name=vm.name, corpus_path=vm.corpus_path, project=vm.project)
     resp = flask.redirect('/review')
     return resp

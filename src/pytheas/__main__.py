@@ -3,6 +3,9 @@ Entry point for starting the application along with `app.py`.
 
 They're meant to be more or less identical, but there may be some differences between the two.
 """
+import pathlib
+import sys
+
 from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
 from tornado.wsgi import WSGIContainer
@@ -17,7 +20,7 @@ from paste.translogger import TransLogger
 
 import dotenv
 
-from pytheas.data import mongo_setup
+from pytheas.data import mongo_setup, zodb_setup
 
 dotenv.load_dotenv('../.env')
 
@@ -63,8 +66,13 @@ def run_tornado_server(port=8090):
     IOLoop.instance().start()
 
 
-def setup_db():
-    mongo_setup.global_init()  # TODO get username/password
+def setup_db(base_dir):
+    name = 'pytheas.db'
+    if base_dir:
+        db_path = pathlib.Path(base_dir) / name
+    else:
+        db_path = pathlib.Path.home() / name
+    zodb_setup.global_init(str(db_path))  # TODO get username/password
 
 
 def register_blueprints():
@@ -83,7 +91,7 @@ def main():
     app.config.from_object(config[env])
     app.config.from_mapping(**dict(os.environ))
     prepare_config(debug)
-    setup_db()
+    setup_db(app.config['BASE_DIR'])
     register_blueprints()
     if server == 'cherrypy':
         run_cherrypy_server(port=port)

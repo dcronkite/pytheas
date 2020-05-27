@@ -8,7 +8,9 @@ class HomeViewModel(ViewModelBase):
     def __init__(self):
         super().__init__()
         self.corpus_path = self.request_dict.corpus_path
-        self.previous_corpus_paths = service.get_previous_corpus_paths()
+        self.name = self.request_dict.name
+        self.project = self.request_dict.project
+        self.previous_corpora = service.get_previous_corpora()
         self.previous_corpus_path = self.request_dict.previous_corpus_path
 
     def validate(self):

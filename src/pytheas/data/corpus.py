@@ -1,7 +1,10 @@
-import mongoengine as mongoengine
+from dataclasses import dataclass
+
+import persistent as persistent
 
 
-class Corpus(mongoengine.Document):
-    name = mongoengine.StringField()
-    path = mongoengine.StringField()
-    project = mongoengine.StringField()
+@dataclass
+class Corpus(persistent.Persistent):
+    name: str
+    path: str
+    project: str

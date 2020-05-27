@@ -1,20 +1,22 @@
-import mongoengine
+from dataclasses import dataclass, field
+from typing import List
+
+import persistent
 
 from pytheas.data.annotation import Annotation
 from pytheas.data.corpus import Corpus
 
 
-class Document(mongoengine.Document):
-    name = mongoengine.StringField(unique=True)
-    length = mongoengine.IntField()
-    annotations = mongoengine.ListField(mongoengine.ReferenceField(Annotation))
-    corpora = mongoengine.ListField(mongoengine.ReferenceField(Corpus))
+@dataclass
+class Document(persistent.Persistent):
+    name: str
+    length: int
+    annotations: List[Annotation] = field(default_factory=list)
+    corpora: List[Corpus] = field(default_factory=list)
 
-    meta = {
-        'collection': 'documents',
-        'db_alias': 'core',
-        'indexes': [
-            'name',
-            'length',
-        ]
-    }
+    def add_annotation(self, annot: Annotation):
+        self.annotations.append(annot)
+        self._p_changed = True
+
+    def add_corpus(self, corpus: Corpus):
+        self.corpora.append(corpus)

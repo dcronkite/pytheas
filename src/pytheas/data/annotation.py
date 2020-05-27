@@ -1,5 +1,13 @@
-import mongoengine
+from dataclasses import dataclass
+
+import persistent
+
+from pytheas.data.annotation_label import AnnotationLabel
+from pytheas.data.user import User
 
 
-class Annotation(mongoengine.Document):
-    label = mongoengine.StringField()
+@dataclass
+class Annotation(persistent.Persistent):
+    label: AnnotationLabel
+    source: User
+    text: str
