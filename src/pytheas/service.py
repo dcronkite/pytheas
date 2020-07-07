@@ -1,7 +1,7 @@
 import transaction
 from flask import session
 
-from pytheas.data.corpus import Corpus
+from pytheas.data.mongodb.corpus import Corpus
 from pytheas.data.zodb_setup import get_root
 
 

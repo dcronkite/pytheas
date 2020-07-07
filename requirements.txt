@@ -9,3 +9,4 @@ python-dotenv~=0.13.0
 zodb
 persistent~=4.6.4
 Werkzeug~=1.0.1
+mongoengine

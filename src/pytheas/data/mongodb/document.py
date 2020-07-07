@@ -3,8 +3,8 @@ from typing import List
 
 import persistent
 
-from pytheas.data.annotation import Annotation
-from pytheas.data.corpus import Corpus
+from pytheas.data.mongodb.annotation import Annotation
+from pytheas.data.mongodb.corpus import Corpus
 
 
 @dataclass
