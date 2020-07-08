@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Create Project{% endblock %}
+{% block body %}
+<form class="form-signin" method="post">
+    <h1 class="h3 mb-3 font-weight-normal">Create a New Project</h1>
+    <label for="project_name" class="sr-only">Project Name</label>
+    {{ form.project_name(class_="form-control", placeholder="Project Name") }}
+    <label for="start_date" class="sr-only">Start Date</label>
+    {{ form.start_date(class_="form-control", placeholder="Start Date") }}
+    <label for="end_date" class="sr-only">End Date</label>
+    {{ form.end_date(class_="form-control", placeholder="End Date") }}
+    {{ form.hidden_tag() }}
+    <button class="btn btn-lg btn-primary btn-block" type="submit">Create Project</button>
+    <button class="btn btn-lg btn-warning btn-block" type="submit" name="back" value="back">Back</button>
+    <p class="mt-5 mb-3 text-muted">&copy; 2020</p>
+    <div>
+        {% for message in errors %}
+            <div class="alert alert-danger">
+                Problem with {{ field }}: {{ message }}
+            </div>
+        {% endfor %}
+        {% for field, messages in form.errors.items() %}
+            {% for message in messages %}
+
+                <div class="alert alert-danger">
+                    Problem with {{ field }}: {{ message }}
+                </div>
+            {% endfor %}
+        {% endfor %}
+    </div>
+</form>
+
+{% endblock %}

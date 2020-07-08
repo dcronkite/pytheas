@@ -6,6 +6,7 @@ They're meant to be more or less identical, but there may be some differences be
 import pathlib
 
 from apscheduler.schedulers.background import BackgroundScheduler
+from flask_login import LoginManager
 from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
 from tornado.wsgi import WSGIContainer
@@ -55,6 +56,17 @@ def run_cherrypy_server(port=8090):
     cherrypy.engine.block()
 
 
+def setup_login():
+    from pytheas.data.users import User
+    login_manager = LoginManager()
+    login_manager.login_view = 'login.login'
+    login_manager.init_app(app)
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        return User.objects(pk=user_id).first()
+
+
 def run_tornado_server(port=8090):
     """
     TODO: enable logging
@@ -70,10 +82,12 @@ def register_blueprints():
     from pytheas.views import home_views
     from pytheas.views import review_views
     from pytheas.views import admin_views
+    from pytheas.views import login_view
 
     app.register_blueprint(home_views.blueprint)
     app.register_blueprint(review_views.blueprint)
     app.register_blueprint(admin_views.blueprint)
+    app.register_blueprint(login_view.blueprint)
 
 
 def create_scheduled_jobs():
@@ -86,7 +100,7 @@ def create_scheduled_jobs():
 
 
 def main():
-    server = os.environ.get('SERVER', 'cherrypy')
+    server = os.environ.get('SERVER', 'tornado')
     port = int(os.environ.get('FLASK_PORT', 8090))
     env = os.environ.get('FLASK_ENV', 'development')
     debug = env == 'development'
@@ -96,10 +110,13 @@ def main():
     mongo_setup.global_init()
     register_blueprints()
     create_scheduled_jobs()
+    setup_login()
     if server == 'cherrypy':
         run_cherrypy_server(port=port)
     elif server == 'tornado':
         run_tornado_server(port=port)
+    else:
+        app.run(host='0.0.0.0', port=port, debug=False)
 
 
 if __name__ == '__main__':
