@@ -6,7 +6,7 @@ import mongoengine
 class Annotation(mongoengine.Document):
     username = mongoengine.StringField()
     project = mongoengine.StringField()
-    document_id = mongoengine.StringField()
+    document_id = mongoengine.ObjectIdField()
     created_date = mongoengine.DateTimeField(default=datetime.datetime.now)
     update_dates = mongoengine.ListField(mongoengine.DateTimeField())
     responses = mongoengine.ListField()

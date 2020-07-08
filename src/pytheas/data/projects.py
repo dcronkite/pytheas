@@ -4,7 +4,7 @@ import mongoengine
 
 
 class Project(mongoengine.Document):
-    project_name = mongoengine.StringField()
+    project_name = mongoengine.StringField(unique=True)
     created_date = mongoengine.DateTimeField(default=datetime.datetime.now)
     start_date = mongoengine.DateTimeField()
     end_date = mongoengine.DateTimeField()

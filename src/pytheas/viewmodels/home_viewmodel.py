@@ -1,6 +1,6 @@
 import os
 
-from pytheas import service
+from pytheas.services import service
 from pytheas.viewmodels.viewmodelbase import ViewModelBase
 
 

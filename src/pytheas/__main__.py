@@ -5,6 +5,7 @@ They're meant to be more or less identical, but there may be some differences be
 """
 import pathlib
 
+from apscheduler.schedulers.background import BackgroundScheduler
 from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
 from tornado.wsgi import WSGIContainer
@@ -19,7 +20,7 @@ from paste.translogger import TransLogger
 
 import dotenv
 
-from pytheas.data import zodb_setup
+from pytheas.data import mongo_setup
 
 dotenv.load_dotenv('../.env')
 
@@ -65,21 +66,23 @@ def run_tornado_server(port=8090):
     IOLoop.instance().start()
 
 
-def setup_db(base_dir):
-    name = 'pytheas.db'
-    if base_dir:
-        db_path = pathlib.Path(base_dir) / name
-    else:
-        db_path = pathlib.Path.home() / name
-    zodb_setup.global_init(str(db_path))  # TODO get username/password
-
-
 def register_blueprints():
     from pytheas.views import home_views
     from pytheas.views import review_views
+    from pytheas.views import admin_views
 
     app.register_blueprint(home_views.blueprint)
     app.register_blueprint(review_views.blueprint)
+    app.register_blueprint(admin_views.blueprint)
+
+
+def create_scheduled_jobs():
+    from pytheas.tasks.load_data import load_data
+
+    app.config['DATA_DIR'] = mkdir_p(os.path.join(app.config['BASE_DIR'], 'data'))
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(load_data, 'cron', hour='23', minute='30', timezone='America/Los_Angeles')
+    scheduler.start()
 
 
 def main():
@@ -90,8 +93,9 @@ def main():
     app.config.from_object(config[env])
     app.config.from_mapping(**dict(os.environ))
     prepare_config(debug)
-    setup_db(app.config['BASE_DIR'])
+    mongo_setup.global_init()
     register_blueprints()
+    create_scheduled_jobs()
     if server == 'cherrypy':
         run_cherrypy_server(port=port)
     elif server == 'tornado':

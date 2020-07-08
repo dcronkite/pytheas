@@ -1,7 +1,6 @@
 import flask
-from flask import session
 
-from pytheas import service
+from pytheas.services import service
 from pytheas.utils.view_modifiers import response
 from pytheas.viewmodels.review_viewmodel import ReviewViewModel
 

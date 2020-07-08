@@ -1,9 +1,6 @@
 import transaction
 from flask import session
 
-from pytheas.data.mongodb.corpus import Corpus
-from pytheas.data.zodb_setup import get_root
-
 
 def add_regex(regex: str):
     session['new_regex'] = regex

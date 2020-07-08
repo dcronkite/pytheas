@@ -1,6 +1,6 @@
 import flask
 
-from pytheas import service
+from pytheas.services import service
 from pytheas.utils.view_modifiers import response
 from pytheas.viewmodels.home_viewmodel import HomeViewModel
 

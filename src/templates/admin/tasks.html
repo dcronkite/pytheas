@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Admin Tasks{% endblock %}
+{% block body %}
+    <form action="" method="POST" class="account-form">
+        {% for task in tasks %}
+            <button type="submit" class="btn btn-danger" value="{{ task.value }}" name="chosen_task">{{ task.name }}</button>
+        {% endfor %}
+        {% if error %}
+            <div class="error-msg">{{ error }}</div>
+        {% endif %}
+    </form>
+{% endblock %}

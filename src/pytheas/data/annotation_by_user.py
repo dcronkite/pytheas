@@ -7,7 +7,7 @@ from pytheas.data.enum_field import EnumField
 
 class AnnotationByUser(mongoengine.Document):
     username = mongoengine.StringField()
-    document_id = mongoengine.StringField()
+    document_id = mongoengine.ObjectIdField()
     project_name = mongoengine.StringField()
     annotation_id = mongoengine.ObjectIdField()
     created_date = mongoengine.DateTimeField(default=datetime.datetime.now)
