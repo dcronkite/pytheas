@@ -8,6 +8,7 @@ class Upload(mongoengine.Document):
     project_name = mongoengine.StringField()
     created_date = mongoengine.DateTimeField(default=datetime.datetime.now)
     completed_date = mongoengine.DateTimeField()
+    completed = mongoengine.BooleanField(default=False)
     document_ids = mongoengine.ListField(mongoengine.ObjectIdField())
     errors = mongoengine.ListField(mongoengine.StringField())
 
@@ -19,5 +20,6 @@ class Upload(mongoengine.Document):
         ]
     }
 
-    def completed(self):
+    def mark_completed(self):
         self.completed_date = datetime.datetime.now()
+        self.completed = True

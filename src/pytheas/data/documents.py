@@ -9,7 +9,7 @@ class Document(mongoengine.Document):
     project_name = mongoengine.StringField()
     username = mongoengine.StringField()
     order = mongoengine.IntField(default=0, min_value=0, max_value=100000)
-    text = mongoengine.StringField(unique=True)
+    text = mongoengine.StringField()
     highlights = mongoengine.ListField(mongoengine.StringField())
     created_date = mongoengine.DateTimeField(default=datetime.datetime.now)
     expiration_date = mongoengine.DateTimeField(
@@ -29,3 +29,7 @@ class Document(mongoengine.Document):
             '+order',
         ]
     }
+
+    @property
+    def name(self):
+        return self.document_name

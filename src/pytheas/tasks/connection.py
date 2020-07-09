@@ -7,12 +7,12 @@ from pytheas.utils import sqlai
 @dataclass
 class Connection:
     name: str
-    path: str
-    driver: str
-    server: str
-    database: str
-    name_col: str
-    text_col: str
+    path: str = None
+    driver: str = None
+    server: str = None
+    database: str = None
+    name_col: str = None
+    text_col: str = None
 
     def get(self, document_name):
         if self.path:

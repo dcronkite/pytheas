@@ -19,5 +19,9 @@ class Project(mongoengine.Document):
     }
 
     @property
+    def name(self):
+        return self.project_name
+
+    @property
     def is_active(self):
         return self.end_date <= datetime.datetime.now() <= self.start_date

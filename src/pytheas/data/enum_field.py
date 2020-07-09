@@ -15,9 +15,12 @@ class EnumField(BaseField):
             pass
         return value
 
-    def validate(self, value):
+    def to_mongo(self, value):
+        return value.value
+
+    def validate(self, value, **kwargs):
         try:
-            value = int(value)
+            value = value.value
         except (TypeError, ValueError):
             self.error(f'{value} could not be converted to int')
 

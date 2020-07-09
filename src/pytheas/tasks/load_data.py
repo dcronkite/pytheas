@@ -44,7 +44,7 @@ def add_documents_to_user(upload: Upload, project_name: str, username: str, docu
             else:
                 raise ValueError(f'Unable to locate document {name}')
         doc = Document(
-            name=name,
+            document_name=name,
             metadata=document.get('metadata', dict()),
             username=username,
             text=text,
@@ -52,7 +52,7 @@ def add_documents_to_user(upload: Upload, project_name: str, username: str, docu
             order=document.get('order', order),
             highlights=document.get('highlights', list()),
             expiration_date=resolve_expiration_date(document.get('expiration_date', None), end_date),
-            offsets=[Highlight(start=start, end=end) for start, end in document.get('offsets', list())],
+            offsets=[Highlight(**offset) for offset in document.get('offsets', list())],
             labels=document.get('labels', labels)
         )
         doc.save()
@@ -76,11 +76,11 @@ def _load_json_to_database(filepath, upload: Upload):
         return False
 
     # setup connections
-    connections = setup_connections(data['data']['connections'])
+    connections = setup_connections(*data['connections'])
 
     # get project
     try:
-        project = Project.objects(project_name=data['project'])
+        project = Project.objects(project_name=data['project']).first()
     except Exception as e:
         raise ValueError(f'Project does not exist: {data["project"]}, {e}')
 
@@ -91,7 +91,7 @@ def _load_json_to_database(filepath, upload: Upload):
     start_index = 0
     end_index = None
     n_users = len(data['annotation']['annotators'])
-    for user_index, user in data['annotation']['annotators']:
+    for user_index, user in enumerate(data['annotation']['annotators']):
         if user['name'] not in project.usernames:
             raise ValueError(f'User not part of project: {user["name"]}, {project.name}')
         add_documents_to_user(upload,
@@ -128,31 +128,39 @@ def _load_json_to_database(filepath, upload: Upload):
                               labels=labels,
                               end_date=project.end_date,
                               )
+    return True
 
 
 def load_data():
     with app.app_context():
         data_dir = app.config['DATA_DIR']
-        print(data_dir)
-        names = {upload.name for upload in Upload.objects}
+        names = {upload.name for upload in Upload.objects(completed=True)}
         # TODO: handle incomplete uploads
         for root, dirs, files in os.walk(data_dir):
             for file in files:
+                print(file)
                 if not file.endswith('json'):
                     continue
                 filename = file[:-5]
+                print(names)
                 if filename not in names:
                     upload = Upload(
                         name=filename,
                         source_path=root,
                     )
+                    print(upload)
                     upload.save()
                     try:
-                        _load_json_to_database(os.path.join(root, file), upload)
+                        result = _load_json_to_database(os.path.join(root, file), upload)
                     except Exception as e:
                         print(f'Failed to load {file} at {root} due to {e}')
-                        upload.errors.append(e)
+                        raise e
+                        upload.errors.append(str(e))
                         upload.save()
                         continue
-                    upload.completed()
-                    upload.save()
+                    if result:
+                        upload.mark_completed()
+                        upload.save()
+                        print(f'Done {upload}')
+                    else:
+                        print(f'Upload failed for {filename}')

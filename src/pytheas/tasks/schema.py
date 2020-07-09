@@ -19,7 +19,7 @@ def get_schema():
             },
             'documents': {'type': 'array', 'items': {'$ref': '#/definitions/document'}},
             'irr_documents': {'type': 'array', 'items': {'$ref': '#/definitions/document'}},
-            'labels': {'type': 'string'},
+            'labels': {'type': 'array', 'items': {'type': 'string'}},
             'highlights': {'type': 'array', 'items': {'type': 'string'}},
             'project': {'type': 'string'},
             'start_date': {'type': 'string'},
