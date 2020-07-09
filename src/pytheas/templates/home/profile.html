@@ -1,0 +1,65 @@
+{% extends "shared/_layout.html" %}
+
+{% block content %}
+
+
+    <div class="my-3 p-3 bg-blue rounded box-shadow">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">User Profile</h6>
+            <small>Since {{ user.created_date }}</small>
+        </div>
+        <div class="media text-muted pt-3">
+            <p class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
+                <strong class="d-block">Username</strong>
+                {{ user.username }}
+            </p>
+        </div>
+        <div class="media text-muted pt-3">
+            <p class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
+                <strong class="d-block">Display Name</strong>
+                <input id="displayName" maxlength="30" type="text" value="{{ user.display_name }}">
+                <button class="bg-info" onclick="updateDisplayName()">Save</button>
+            </p>
+        </div>
+        <div class="media text-muted pt-3">
+            <p class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
+                <strong class="d-block">Email</strong>
+                {{ user.email }}
+            </p>
+        </div>
+        <div class="media text-muted pt-3">
+            <p class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
+                <strong class="d-block">Image</strong>
+                <img class="img-profile rounded-circle"
+                     src="https://source.unsplash.com/{{ user.display_image }}/60x60">
+            </p>
+        </div>
+
+    </div>
+{% endblock %}
+
+{% block scripts %}
+
+    <script>
+        var displayNameElement = document.getElementById('displayName');
+        var displayNameHeaderElement = document.getElementById('displayNameHeader');
+        var displayImageHeaderElement = document.getElementById('displayImageHeader');
+        function updateDisplayName() {
+            fetch('/profile/display/name', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    'displayName': displayNameElement.value,
+                })
+            })
+            .then(function (response) {
+                // TODO: show message
+                displayNameHeaderElement.textContent = displayNameElement.value;
+                return response.json();
+            })
+        }
+    </script>
+{% endblock %}

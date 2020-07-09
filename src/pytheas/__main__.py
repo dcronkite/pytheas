@@ -100,7 +100,7 @@ def create_scheduled_jobs():
 
 
 def main():
-    server = os.environ.get('SERVER', 'tornado')
+    server = os.environ.get('SERVER', '')
     port = int(os.environ.get('FLASK_PORT', 8090))
     env = os.environ.get('FLASK_ENV', 'development')
     debug = env == 'development'

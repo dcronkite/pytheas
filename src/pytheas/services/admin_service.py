@@ -21,6 +21,10 @@ def run_task(chosen_task):
 def add_users_to_project(usernames, project):
     project = Project.objects(project_name=project).first()
     for username in usernames:
+        user = User.objects(username=username).first()
+        if project.project_name not in user.projects:
+            user.projects.append(project.project_name)
+            user.save()
         if username not in project.usernames:
             project.usernames.append(username)
             project.save()

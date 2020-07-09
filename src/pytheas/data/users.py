@@ -10,6 +10,8 @@ class User(UserMixin, mongoengine.Document):
     hashed_password = mongoengine.StringField()
     created_date = mongoengine.DateTimeField(default=datetime.datetime.now)
     display_name = mongoengine.StringField(default=None)
+    image_url = mongoengine.StringField(default='r_TzuObQYBQ')
+    projects = mongoengine.ListField(mongoengine.StringField())
 
     meta = {
         'collection': 'users',
