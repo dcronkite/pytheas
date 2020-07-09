@@ -5,6 +5,7 @@ import mongoengine
 
 class Project(mongoengine.Document):
     project_name = mongoengine.StringField(unique=True)
+    description = mongoengine.StringField()
     created_date = mongoengine.DateTimeField(default=datetime.datetime.now)
     start_date = mongoengine.DateTimeField()
     end_date = mongoengine.DateTimeField()

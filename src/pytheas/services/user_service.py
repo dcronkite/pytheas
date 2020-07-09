@@ -30,6 +30,10 @@ def get_current_user_id():
     return current_user.id
 
 
+def get_current_username():
+    return current_user.username
+
+
 def update_display_name(new_display_name):
     # TODO: validation of name
     current_user.display_name = new_display_name
@@ -38,6 +42,6 @@ def update_display_name(new_display_name):
 
 def get_projects():
     return [
-        {'name': project, 'url_name': urllib.parse.quote(project)}
+        {'name': project, 'url_name': urllib.parse.quote_plus(project)}
         for project in current_user.projects
     ]

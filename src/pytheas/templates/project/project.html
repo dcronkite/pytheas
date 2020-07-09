@@ -1,0 +1,249 @@
+{% extends "shared/_layout.html" %}
+
+{% block pre_content %}
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">{{ project_details.name }}</h1>
+        <div>
+            <a href="#" data-toggle="modal" data-target="#downloadModal" onclick="prepareDownloads()"
+               class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                <i class="fas fa-download fa-sm text-white-50"></i>
+                Download</a>
+            <a href="#" data-toggle="modal" data-target="#bookmarkModal"
+               class="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm">
+                <i class="fas fa-bookmark fa-sm text-white-50"></i>
+                Bookmark</a>
+            <a href="#" data-toggle="modal" data-target="#feedbackModal" onclick="buildStarRatingControl()"
+               class="d-none d-sm-inline-block btn btn-sm btn-info shadow-sm">
+                <i class="fas fa-bookmark fa-sm text-white-50"></i>
+                Feedback</a>
+        </div>
+    </div>
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="card shadow mb-4 col-sm-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Actions</h6>
+            </div>
+            <div class="card-body">
+                <a href="/project/review/{{ project_details.name_url }}"
+                   class="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm">
+                    <i class="fas fa-book-open fa-sm text-white-50"></i>
+                    Begin Review
+                </a>
+                <a href="/project/history/{{ project_details.name_url }}"
+                   class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm">
+                    <i class="fas fa-history fa-sm text-white-50"></i>
+                    View History
+                </a>
+            </div>
+        </div>
+        <div class="card shadow mb-4 col-sm-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Description</h6>
+            </div>
+            <div class="card-body">
+                <p>Description: {{ project_details.description }}</p>
+                <p>Start Date: {{ project_details.start_date }}</p>
+                <p>End Date: {{ project_details.end_date }}</p>
+            </div>
+        </div>
+        <div class="card shadow mb-4 col-sm-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Review State</h6>
+            </div>
+            <div class="card-body">
+                <ul>
+                    {% for review in review_details %}
+                        <li>{{ review.state }}: {{ review.count }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <div class="card shadow mb-4 col-sm-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Annotation Statistics</h6>
+            </div>
+            <div class="card-body">
+                {% if annotation_summary %}
+                    <ul>
+                        {% for annotation in annotation_summary %}
+                            <li>{{ annotation.response }}: {{ annotation.count }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>No annotations completed.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+
+    {% block main_content %}
+    {% endblock %}
+
+    {% block modals %}
+        <!-- Bookmark Modal-->
+        <div>
+        <div class="modal fade" id="bookmarkModal" tabindex="-1" role="dialog" aria-labelledby="bookmarkModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="bookmarkModalLabel">Create URL for Query</h5>
+                        <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <i class="fas fa-folder"></i>
+                            <label for="inputBookmarkName" class="mr-2 col-form-label-sm">Name</label>
+                            <input id="inputBookmarkName" class="form-control" type="text" minlength="4" maxlength="30"
+                                   value=""/>
+                        </div>
+                        <div class="form-group">
+                            <i class="fas fa-file-word"></i>
+                            <label for="inputBookmarkDescription">Description</label>
+                            <textarea id="inputBookmarkDescription" maxlength="100" class="md-textarea form-control"
+                                      rows="3"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <i class="fas fa-link"></i>
+                            <label for="inputBookmarkURL">Generated URL</label>
+                            <input id="inputBookmarkURL" class="form-control" type="text" readonly/>
+
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-primary" type="button" onclick="saveState()">Create Bookmark</button>
+                            <button class="btn btn-secondary" type="button" data-dismiss="modal">Dismiss</button>
+                            <button class="btn btn-warning" onclick="copyContent('inputBookmarkURL')">
+                                Copy URL
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Download Modal-->
+        <div>
+        <div class="modal fade" id="downloadModal" tabindex="-1" role="dialog" aria-labelledby="downloadModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="downloadModalLabel">Download Data</h5>
+                        <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="download-spinner" class="spinner-border text-info float-right" role="status">
+                            <span class="sr-only">Preparing download...</span>
+                        </div>
+                        <div id="download-ready" hidden="true">
+                            <p>Download ready!</p>
+                        </div>
+                        <div class="modal-footer">
+                            <a id="downloadTableButton" href="" target="_blank" class="btn btn-primary" type="button"
+                               onclick="downloadTable()">Table</a>
+                            <button class="btn btn-secondary" type="button" data-dismiss="modal">Dismiss</button>
+                            <a id="downloadCodesButton" href="" target="_blank" class="btn btn-warning"
+                               onclick="downloadCodes()">
+                                Codes
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Feedback Modal-->
+        <div>
+        <div class="modal fade" id="feedbackModal" tabindex="-1" role="dialog" aria-labelledby="feedbackModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="feedbackModalLabel">Feedback</h5>
+                        <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+
+                        <div class="form-group">
+                            <i class="fas fa-folder"></i>
+                            <label for="inputFeedbackName" class="mr-2 col-form-label-sm">Name</label>
+                            <input id="inputFeedbackName" class="form-control" type="text" minlength="4" maxlength="30"
+                                   value=""/>
+                        </div>
+                        <div class="form-group">
+                            <i class="fas fa-file-word"></i>
+                            <label for="inputFeedbackDescription">Description</label>
+                            <textarea id="inputFeedbackDescription" maxlength="100" class="md-textarea form-control"
+                                      rows="3"></textarea>
+                        </div>
+                        <select id="inputFeedbackSelect" class="star-rating">
+                            <option value="" selected>Select a rating</option>
+                            <option value="5">Excellent</option>
+                            <option value="4">Very Good</option>
+                            <option value="3">Average</option>
+                            <option value="2">Poor</option>
+                            <option value="1">Terrible</option>
+                        </select>
+                        <div class="modal-footer">
+                            <button id="submitFeedback" class="btn btn-primary" type="button"
+                                    onclick="submitFeedback()" data-dismiss="modal">Submit
+                            </button>
+                            <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endblock %}
+{% endblock %}
+
+{% block counter_scripts %}
+
+
+    <script>
+
+        var inputFeedbackName = document.getElementById('inputFeedbackName');
+        var inputFeedbackDescription = document.getElementById('inputFeedbackDescription');
+        var starRatingControl = new StarRating('.star-rating');
+
+        function buildStarRatingControl() {
+            starRatingControl.rebuild();
+        }
+
+        function submitFeedback() {
+            var rating = starRatingControl.widgets[0].selected;
+            fetch('/feedback/submit/', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    'title': inputFeedbackName.value,
+                    'description': inputFeedbackDescription.value,
+                    'rating': rating,
+                })
+            })
+                .then(function (response) {
+                    return response.json();
+                }).then(function (data) {
+                inputFeedbackName.value = '';
+                inputFeedbackDescription.value = '';
+                var options = document.querySelectorAll('#inputFeedbackSelect option');
+                for (var i = 0, l = options.length; i < l; i++) {
+                    options[i].selected = options[i].defaultSelected;
+                }
+                console.log(data['message']);
+            });
+        }
+    </script>
+{% endblock %}
