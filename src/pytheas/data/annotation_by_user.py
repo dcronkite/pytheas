@@ -12,6 +12,7 @@ class AnnotationByUser(mongoengine.Document):
     annotation_id = mongoengine.ObjectIdField()
     created_date = mongoengine.DateTimeField(default=datetime.datetime.now)
     annotation_state = EnumField(enum_class=AnnotationState)
+    order = mongoengine.IntField(default=0, min_value=0, max_value=100000)
 
     meta = {
         'collection': 'annotations_by_users',
@@ -20,6 +21,7 @@ class AnnotationByUser(mongoengine.Document):
             'username',
             'document_id',
             'project_name',
+            '+order',
             'annotation_id',
             'annotation_state',
         ]

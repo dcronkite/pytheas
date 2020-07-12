@@ -20,3 +20,10 @@ class Annotation(mongoengine.Document):
             'document_id',
         ]
     }
+
+    def to_json(self):
+        return {
+            'username': self.username,
+            'project': self.project,
+            'responses': self.responses,
+        }
