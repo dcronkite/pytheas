@@ -10,6 +10,7 @@ class Annotation(mongoengine.Document):
     created_date = mongoengine.DateTimeField(default=datetime.datetime.now)
     update_dates = mongoengine.ListField(mongoengine.DateTimeField())
     responses = mongoengine.ListField()
+    comment = mongoengine.StringField()
 
     meta = {
         'collection': 'annotations',

@@ -33,15 +33,17 @@
         {% block style %}
         {% endblock %}
 
-    .word_emphasize {
-        font-weight: bold;
-    }
-    .word_highlight {
-        background-color: lime;
-    }
+        .word_emphasize {
+            font-weight: bold;
+        }
+
+        .word_highlight {
+            background-color: lime;
+        }
     </style>
 
     <script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/js/jquery.min.js"></script>
     <script src="/static/js/bootstrap.bundle.min.js"></script>
 </head>
 <body>
@@ -86,7 +88,7 @@
 
     <div class="card col-3 form-group">
         <label for="comment">Comment:</label>
-        <textarea class="form-control" rows="5" id="comment"></textarea>
+        <textarea class="form-control" rows="5" id="comment">{{ document.comment }}</textarea>
         <h2>History</h2>
         <ul>
             {% for item in history %}
@@ -117,6 +119,25 @@
     </div>
 
     <div class="card col-3">
+
+        <h2>Notifications</h2>
+        <div aria-live="polite" aria-atomic="true" style="position: relative; min-height: 200px;">
+            <!-- Position it -->
+            <div id="toast" class="toast" role="alert" aria-live="assertive"
+                 aria-atomic="true" data-delay="50000">
+                <div class="toast-header">
+                    {#    <img src="..." class="rounded mr-2" alt="...">#}
+                    <strong id="toast-header" class="mr-auto">Info</strong>
+                    <small id="toast-mini"></small>
+                    <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div id="toast-message" class="toast-body">
+
+                </div>
+            </div>
+        </div>
         <h2>Highlight</h2>
         <ul>
             {% for highlight in document.highlights %}
@@ -126,6 +147,40 @@
     </div>
 </div>
 
+<script>
+    const commentBlock = document.getElementById('comment');
+    {#const toast = document.getElementById('toast');#}
+    const toast = $('#toast');
+    const toastMessage = document.getElementById('toast-message');
+    const toastHeader = document.getElementById('toast-header');
+    const toastMini = document.getElementById('toast-mini');
+    commentBlock.addEventListener('change', function () {
+        fetch('/project/review/{{ project.name_url }}/{{ document.annotation_id }}', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                'comment': commentBlock.value,
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data['errors'].length > 0) {
+                    toastHeader.innerText = data['errors'][0]['header'];
+                    toastMessage.innerText = data['errors'][0]['message'];
+                    toastMini.innerText = `${data['errors'].length} errors`
+                } else {
+                    toastHeader.innerText = 'Save Successful';
+                    toastMini.innerText = 'Just now...';
+                    toastMessage.innerText = 'Successfully saved comment';
+                }
+                console.log(toast);
+                toast.toast('show');
+            });
+    });
+</script>
 
 </body>
 </html>

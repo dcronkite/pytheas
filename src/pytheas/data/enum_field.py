@@ -16,18 +16,23 @@ class EnumField(BaseField):
         return value
 
     def to_mongo(self, value):
+        if isinstance(value, int):
+            return value
         return value.value
 
     def validate(self, value, **kwargs):
-        try:
-            value = value.value
-        except (TypeError, ValueError):
-            self.error(f'{value} could not be converted to int')
-
-        try:
-            value = self.enum_class(value)
-        except ValueError:
-            self.error(f'{value} could not be converted to {self.enum_class.__name__}')
+        if isinstance(value, enum.Enum):
+            try:
+                value = value.value
+            except (TypeError, ValueError):
+                self.error(f'{value} could not be converted to int')
+        elif isinstance(value, int):
+            try:
+                value = self.enum_class(value)
+            except ValueError:
+                self.error(f'{value} could not be converted to {self.enum_class.__name__}')
+        else:
+            self.error(f'Unrecognized type: {value}; expected Enum or int')
 
     def prepare_query_value(self, op, value: enum.Enum):
         if value is None:

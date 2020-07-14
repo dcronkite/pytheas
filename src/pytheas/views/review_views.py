@@ -35,7 +35,6 @@ def review_post():
 def reviewer(project_url_name):
     project_name = urllib.parse.unquote_plus(project_url_name)
     annot = annotation_service.get_next_annotation(project_name, user_service.get_current_username())
-    print(annot)
     if annot:
         return {
             'user': user_service.get_current_user(),
@@ -46,3 +45,20 @@ def reviewer(project_url_name):
         return {
 
         }
+
+
+@blueprint.route('/project/review/<string:project_url_name>/<string:annotation_id>', methods=['POST'])
+@login_required
+def update_comment(project_url_name, annotation_id):
+    data = flask.request.get_json()
+    errors = []
+    try:
+        annotation_service.update_annotation_comment(annotation_id, data['comment'])
+    except Exception as e:
+        errors.append({
+            'header': 'Save Comment Failed',
+            'message': str(e)
+        })
+    return {
+        'errors': errors,
+    }

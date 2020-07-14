@@ -36,17 +36,24 @@ def get_next_abu(project_name, username):
 def get_next_annotation(project_name, username, highlights=None):
     if not (abu := get_next_abu(project_name, username)):
         return None
+    doc = Document.objects(id=abu.document_id).first()
     if abu.annotation_id:
         annot = Annotation.objects(id=abu.annotation_id).first()
     else:
-        annot = None
-    doc = Document.objects(id=abu.document_id).first()
+        annot = Annotation(
+            username=username,
+            project=project_name,
+            document_id=doc.id,
+        )
+        annot.save()
+        abu.annotation_id = annot.id
+        abu.save()
+    print(annot.id, annot.comment)
     preview = []
     sentences = []
     highlights = doc.highlights + highlights if highlights else ['bmx']
     pat = None if not highlights else re.compile(rf"\b({'|'.join(rx for rx in highlights if rx)})\w*\b", re.IGNORECASE)
     start = 0
-
     for line in doc.text.split('\n'):
         sent_start = start
         sent_end = sent_start + len(line)
@@ -79,7 +86,9 @@ def get_next_annotation(project_name, username, highlights=None):
     for offset in sorted(doc.offsets):
         preview.append(doc.text[offset.start:offset.end])
     return {
-        'responses': annot.responses if annot else list(),
+        'annotation_id': annot.id,
+        'comment': annot.comment,
+        'responses': annot.responses,
         'name': doc.document_name,
         'metadata': doc.metadata,
         'text': doc.text,
@@ -89,3 +98,24 @@ def get_next_annotation(project_name, username, highlights=None):
         'sentences': sentences,
         'preview': preview,
     }
+
+
+def get_annotation(annot_id):
+    return Annotation.objects(id=annot_id).first()
+
+
+def update_annotation_comment(annot_id, comment):
+    update_annotation(annot_id, comment=comment)
+
+
+def update_annotation_response(annot_id, *responses):
+    update_annotation(annot_id, responses=responses)
+
+
+def update_annotation(annot_id, **fields):
+    annot = get_annotation(annot_id)
+    for key, value in fields.items():
+        annot[key] = value
+    print(annot.comment)
+    annot.save()
+    print(annot.comment)
