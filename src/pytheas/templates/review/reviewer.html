@@ -182,7 +182,7 @@
 
     /* functions */
     function saveComment() {
-        fetch('/project/review/{{ project.name_url }}/{{ document.annotation_id }}', {
+        fetch('/project/review/{{ project.name_url }}/{{ document.annotation_id }}/update', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
@@ -211,8 +211,6 @@
     function getResponses() {
         let results = [];
         responsesOptions.forEach((response) => {
-            console.log(response.value);
-            console.log(response.checked);
             if (response.checked === true) {
                 results.push(response.value);
             }
@@ -228,7 +226,7 @@
         inputField.checked = true;
         let responses = getResponses();
         console.log(responses);
-        fetch('/project/review/{{ project.name_url }}/{{ document.annotation_id }}', {
+        fetch('/project/review/{{ project.name_url }}/{{ document.annotation_id }}/update', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
@@ -254,7 +252,7 @@
     }
 
     function saveAll() {
-        fetch('/project/review/{{ project.name_url }}/{{ document.annotation_id }}', {
+        fetch('/project/review/{{ project.name_url }}/{{ document.annotation_id }}/update', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
