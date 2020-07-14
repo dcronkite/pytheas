@@ -51,7 +51,7 @@ def get_next_annotation(project_name, username, highlights=None):
     print(annot.id, annot.comment)
     preview = []
     sentences = []
-    highlights = doc.highlights + highlights if highlights else ['bmx']
+    highlights = doc.highlights + highlights if highlights else []
     pat = None if not highlights else re.compile(rf"\b({'|'.join(rx for rx in highlights if rx)})\w*\b", re.IGNORECASE)
     start = 0
     for line in doc.text.split('\n'):
