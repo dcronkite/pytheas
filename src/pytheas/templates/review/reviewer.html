@@ -98,7 +98,7 @@
         </li>
         <li class="nav-item">
             <a class="nav-link"
-               href="/project/review/{{ project.name_url }}"
+               href="/project/review/{{ project.name_url }}/{{ document.annotation_id }}/next"
                onclick="saveAll()"
             >Next</a>
         </li>
@@ -109,7 +109,7 @@
 
     <div class="card col-3 form-group">
         <label for="comment">Comment:</label>
-        <textarea class="form-control" rows="5" id="comment">{{ document.comment }}</textarea>
+        <textarea class="form-control" rows="5" id="comment">{% if document.comment %}{{ document.comment }}{% endif %}</textarea>
         <h2>History</h2>
         <ul>
             {% for item in history %}

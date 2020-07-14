@@ -10,6 +10,7 @@ class History(mongoengine.Document):
     document_name = mongoengine.StringField()
     update_date = mongoengine.DateTimeField(default=datetime.datetime.now)
     how = mongoengine.StringField()
+    first_entry = mongoengine.BooleanField(default=False)
 
     meta = {
         'collection': 'history',
@@ -17,7 +18,8 @@ class History(mongoengine.Document):
         'indexes': [
             'username',
             'project_name',
-            '-update_date'
+            'first_entry',
+            '-update_date',
         ]
     }
 

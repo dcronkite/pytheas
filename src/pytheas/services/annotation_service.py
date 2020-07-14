@@ -1,3 +1,4 @@
+import datetime
 import re
 from collections import Counter
 
@@ -148,3 +149,17 @@ def update_annotation(annot_id, **fields):
     for key, value in fields.items():
         annot[key] = value
     annot.save()
+
+
+def mark_annotation_completed(project_name, username, annotation_id):
+    done_time = datetime.datetime.now()
+    annot = get_annotation(annotation_id)
+    annot.update_dates.append(done_time)
+    annot.save()
+    abu = AnnotationByUser.objects(
+        username=username,
+        project_name=project_name,
+        annotation_id=annotation_id,
+    ).first()
+    abu.annotation_state = AnnotationState.DONE
+    abu.save()

@@ -67,6 +67,17 @@ def reviewer_specific(project_url_name, annotation_id):
     return _make_reviewer_response(annot, project_name)
 
 
+@blueprint.route('/project/review/<string:project_url_name>/<string:annotation_id>/next')
+@login_required
+@response(template_file='review/reviewer.html')
+def reviewer_next(project_url_name, annotation_id):
+    project_name = urllib.parse.unquote_plus(project_url_name)
+    username = user_service.get_current_username()
+    annotation_service.mark_annotation_completed(project_name, username, annotation_id)
+    annot = annotation_service.get_next_annotation(project_name, user_service.get_current_username())
+    return _make_reviewer_response(annot, project_name)
+
+
 @blueprint.route('/project/review/<string:project_url_name>/<string:annotation_id>/update', methods=['POST'])
 @login_required
 def update(project_url_name, annotation_id):

@@ -1,3 +1,4 @@
+from pytheas.data.annotation_by_user import AnnotationByUser
 from pytheas.data.histories import History, HistoryHow
 
 
@@ -19,19 +20,33 @@ def get_history_for_link(project_name, username, n=20):
 
 
 def write_history(annotation_id, project_name, username, document_name, how: HistoryHow):
+    first_entry = not bool(History.objects(
+        username=username,
+        document_name=document_name,
+        project_name=project_name,
+        annotation_id=annotation_id,
+    ).first())
     History(
         username=username,
         document_name=document_name,
         project_name=project_name,
         annotation_id=annotation_id,
+        first_entry=first_entry,
         how=how.name,
     ).save()
 
 
 def get_previous_annotation_id(project_name, username, curr_annotation_id):
+    curr = History.objects(
+        project_name=project_name,
+        username=username,
+        annotation_id=curr_annotation_id,
+        first_entry=True,
+    ).first()
     h = History.objects(
         project_name=project_name,
         username=username,
-        annotation_id__ne=curr_annotation_id,
+        update_date__lt=curr.update_date,
+        first_entry=True,
     ).order_by('-update_date').first()
     return h.annotation_id if h else None
