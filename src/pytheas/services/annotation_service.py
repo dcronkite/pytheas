@@ -1,3 +1,4 @@
+import re
 from collections import Counter
 
 from pytheas.data.annotation_by_user import AnnotationByUser
@@ -32,7 +33,7 @@ def get_next_abu(project_name, username):
     return None
 
 
-def get_next_annotation(project_name, username):
+def get_next_annotation(project_name, username, highlights=None):
     if not (abu := get_next_abu(project_name, username)):
         return None
     if abu.annotation_id:
@@ -40,6 +41,43 @@ def get_next_annotation(project_name, username):
     else:
         annot = None
     doc = Document.objects(id=abu.document_id).first()
+    preview = []
+    sentences = []
+    highlights = doc.highlights + highlights if highlights else ['bmx']
+    pat = None if not highlights else re.compile(rf"\b({'|'.join(rx for rx in highlights if rx)})\w*\b", re.IGNORECASE)
+    start = 0
+
+    for line in doc.text.split('\n'):
+        sent_start = start
+        sent_end = sent_start + len(line)
+        emphasize = False
+        for offset in doc.offsets:
+            if sent_start <= offset.start < sent_end or sent_start <= offset.end < sent_end:
+                emphasize = True
+                break
+        sentence = []
+        if pat:
+            for m in pat.finditer(line):
+                sentence.append({
+                    'text': doc.text[sent_start:m.start() + sent_start],
+                    'emphasize': emphasize,
+                    'highlight': False
+                })
+                sentence.append({
+                    'text': doc.text[m.start() + sent_start:m.end() + sent_start],
+                    'emphasize': emphasize,
+                    'highlight': True
+                })
+                sent_start = m.end() + sent_start
+        sentence.append({
+            'text': doc.text[sent_start:sent_end],
+            'emphasize': emphasize,
+            'highlight': False,
+        })
+        sentences.append(sentence)
+        start = sent_end
+    for offset in sorted(doc.offsets):
+        preview.append(doc.text[offset.start:offset.end])
     return {
         'responses': annot.responses if annot else list(),
         'name': doc.document_name,
@@ -48,5 +86,6 @@ def get_next_annotation(project_name, username):
         'highlights': doc.highlights,
         'offsets': doc.offsets,
         'labels': doc.labels,
+        'sentences': sentences,
+        'preview': preview,
     }
-

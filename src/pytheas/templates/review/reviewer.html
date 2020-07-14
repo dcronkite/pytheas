@@ -32,6 +32,13 @@
     <style>
         {% block style %}
         {% endblock %}
+
+    .word_emphasize {
+        font-weight: bold;
+    }
+    .word_highlight {
+        background-color: lime;
+    }
     </style>
 
     <script src="/static/js/bootstrap.min.js"></script>
@@ -41,12 +48,12 @@
 
 <div class="row">
     {% for label, value in document.metadata.items() %}
-    <div class="card col-sm-3">
-        <label>
-            {{ label }}
-            <input readonly="readonly" value="{{ value }}"/>
-        </label>
-    </div>
+        <div class="card col-sm-3">
+            <label>
+                {{ label }}
+                <input readonly="readonly" value="{{ value }}"/>
+            </label>
+        </div>
     {% endfor %}
 </div>
 
@@ -54,20 +61,23 @@
 <nav class="navbar navbar-expand-sm bg-dark navbar-dark sticky-top">
     <ul class="navbar-nav">
         <li class="nav-item">
+            <a class="nav-link" href="/project/{{ project.name_url }}">Exit</a>
+        </li>
+        <li class="nav-item">
             <a class="nav-link" href="/project/{{ project.name_url }}">Back</a>
         </li>
         <li class="nav-item">
-        <div class="btn-group btn-group-justified" data-toggle="buttons">
-        {% for label in document.labels %}
-            <label class="btn btn-primary {% if label in document.responses %} active {% endif %}">
-                <input type="checkbox" name="options"  data-toggle="button" onclick="markValue()">
-                {{ label }}
-            </label>
-        {% endfor %}
-        </div>
+            <div class="btn-group btn-group-justified" data-toggle="buttons">
+                {% for label in document.labels %}
+                    <label class="btn btn-primary {% if label in document.responses %} active {% endif %}">
+                        <input type="checkbox" name="options" data-toggle="button" onclick="markValue()">
+                        {{ label }}
+                    </label>
+                {% endfor %}
+            </div>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="#">Next</a>
+            <a class="nav-link" href="/project/{{ project.name_url }}">Next</a>
         </li>
     </ul>
 </nav>
@@ -75,22 +85,42 @@
 <div class="row">
 
     <div class="card col-3 form-group">
-          <label for="comment">Comment:</label>
+        <label for="comment">Comment:</label>
         <textarea class="form-control" rows="5" id="comment"></textarea>
         <h2>History</h2>
+        <ul>
+            {% for item in history %}
+                <li>
+                    <a href="/project/{{ project.name_url }}/{{ item.document_name }}">{{ item.document_name }}</a> {{ item.completed_date }}
+                </li>
+            {% endfor %}
+        </ul>
     </div>
 
     <div class="card col-6">
-        <textarea class="form-control" readonly="readonly" rows="30">
-            {{ document.text }}
-        </textarea>
+        <div style="background-color: lightcyan">
+            {% for line in document.preview %}
+                <p>{{ line }}</p>
+            {% endfor %}
+        </div>
+        <div style="background-color: #ededed">
+            {% for sentence in document.sentences %}
+                <p>
+                    {% for word in sentence %}
+                        <span class="{% if word.emphasize %}word_emphasize{% endif %} {% if word.highlight %}word_highlight{% endif %}">
+                            {{ word.text }}
+                        </span>
+                    {% endfor %}
+                </p>
+            {% endfor %}
+        </div>
     </div>
 
     <div class="card col-3">
         <h2>Highlight</h2>
         <ul>
             {% for highlight in document.highlights %}
-            <li>{{ highlight }}</li>
+                <li>{{ highlight }}</li>
             {% endfor %}
         </ul>
     </div>

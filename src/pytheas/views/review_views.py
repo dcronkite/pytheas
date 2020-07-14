@@ -35,6 +35,7 @@ def review_post():
 def reviewer(project_url_name):
     project_name = urllib.parse.unquote_plus(project_url_name)
     annot = annotation_service.get_next_annotation(project_name, user_service.get_current_username())
+    print(annot)
     if annot:
         return {
             'user': user_service.get_current_user(),
