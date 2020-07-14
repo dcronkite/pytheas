@@ -63,23 +63,40 @@
 <nav class="navbar navbar-expand-sm bg-dark navbar-dark sticky-top">
     <ul class="navbar-nav">
         <li class="nav-item">
-            <a class="nav-link" href="/project/{{ project.name_url }}">Exit</a>
+            <a class="nav-link"
+               href="/project/{{ project.name_url }}"
+               onclick="saveAll()"
+            >Exit</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="/project/{{ project.name_url }}">Back</a>
+            <a class="nav-link"
+               href="/project/{{ project.name_url }}"
+               onclick="saveAll()"
+            >Back</a>
         </li>
         <li class="nav-item">
             <div class="btn-group btn-group-justified" data-toggle="buttons">
                 {% for label in document.labels %}
-                    <label class="btn btn-primary {% if label in document.responses %} active {% endif %}">
-                        <input type="checkbox" name="options" data-toggle="button" onclick="markValue()">
+                    <label for="label_value_{{ label }}" class="btn btn-primary {% if label in document.responses %} active {% endif %}"
+                           onclick="saveResponses(this)"
+                    >
+                        <input id="label_value_{{ label }}"
+                               type="checkbox"
+                               value="{{ label }}"
+                               name="document-options"
+                               data-toggle="button"
+                               {% if label in document.responses %}checked="checked"{% endif %}
+                        >
                         {{ label }}
                     </label>
                 {% endfor %}
             </div>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="/project/{{ project.name_url }}">Next</a>
+            <a class="nav-link"
+               href="/project/{{ project.name_url }}"
+               onclick="saveAll()"
+            >Next</a>
         </li>
     </ul>
 </nav>
@@ -148,13 +165,19 @@
 </div>
 
 <script>
+    /* constants */
     const commentBlock = document.getElementById('comment');
-    {#const toast = document.getElementById('toast');#}
+    const responsesOptions = document.getElementsByName('document-options');
+
+    /* toasts */
     const toast = $('#toast');
     const toastMessage = document.getElementById('toast-message');
     const toastHeader = document.getElementById('toast-header');
     const toastMini = document.getElementById('toast-mini');
-    commentBlock.addEventListener('change', function () {
+
+
+    /* functions */
+    function saveComment() {
         fetch('/project/review/{{ project.name_url }}/{{ document.annotation_id }}', {
             method: 'POST',
             headers: {
@@ -179,7 +202,82 @@
                 console.log(toast);
                 toast.toast('show');
             });
-    });
+    }
+
+    function getResponses() {
+        let results = [];
+        responsesOptions.forEach((response) => {
+            console.log(response.value);
+            console.log(response.checked);
+            if (response.checked === true) {
+                results.push(response.value);
+            }
+        });
+        return results;
+    }
+
+    function saveResponses(target) {
+        let inputField = document.getElementById(target.htmlFor);
+        console.log(target);
+        console.log(target.htmlFor);
+        console.log(inputField);
+        inputField.checked = true;
+        let responses = getResponses();
+        console.log(responses);
+        fetch('/project/review/{{ project.name_url }}/{{ document.annotation_id }}', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                'responses': responses,
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data['errors'].length > 0) {
+                    toastHeader.innerText = data['errors'][0]['header'];
+                    toastMessage.innerText = data['errors'][0]['message'];
+                    toastMini.innerText = `${data['errors'].length} errors`
+                } else {
+                    toastHeader.innerText = 'Save Successful';
+                    toastMini.innerText = 'Just now...';
+                    toastMessage.innerText = 'Successfully saved responses';
+                }
+                toast.toast('show');
+            });
+    }
+
+    function saveAll() {
+        fetch('/project/review/{{ project.name_url }}/{{ document.annotation_id }}', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                'responses': getResponses(),
+                'comment': commentBlock.value,
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data['errors'].length > 0) {
+                    toastHeader.innerText = data['errors'][0]['header'];
+                    toastMessage.innerText = data['errors'][0]['message'];
+                    toastMini.innerText = `${data['errors'].length} errors`
+                } else {
+                    toastHeader.innerText = 'Save Successful';
+                    toastMini.innerText = 'Just now...';
+                    toastMessage.innerText = 'Successfully saved responses and options';
+                }
+                toast.toast('show');
+            });
+    }
+
+    /* listeners */
+    commentBlock.addEventListener('change', saveComment);
 </script>
 
 </body>

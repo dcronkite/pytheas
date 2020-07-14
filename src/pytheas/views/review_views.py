@@ -53,7 +53,7 @@ def update_comment(project_url_name, annotation_id):
     data = flask.request.get_json()
     errors = []
     try:
-        annotation_service.update_annotation_comment(annotation_id, data['comment'])
+        annotation_service.update_annotation(annotation_id, **data)
     except Exception as e:
         errors.append({
             'header': 'Save Comment Failed',
