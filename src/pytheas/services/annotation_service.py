@@ -48,7 +48,6 @@ def get_next_annotation(project_name, username, highlights=None):
         annot.save()
         abu.annotation_id = annot.id
         abu.save()
-    print(annot.id, annot.comment)
     preview = []
     sentences = []
     highlights = doc.highlights + highlights if highlights else []
@@ -116,6 +115,4 @@ def update_annotation(annot_id, **fields):
     annot = get_annotation(annot_id)
     for key, value in fields.items():
         annot[key] = value
-    print(annot.comment)
     annot.save()
-    print(annot.comment)
