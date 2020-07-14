@@ -33,22 +33,64 @@ def get_next_abu(project_name, username):
     return None
 
 
-def get_next_annotation(project_name, username, highlights=None):
-    if not (abu := get_next_abu(project_name, username)):
-        return None
+def _get_or_create_annotation(abu: AnnotationByUser, set_state: AnnotationState = None) -> (Annotation, Document):
     doc = Document.objects(id=abu.document_id).first()
     if abu.annotation_id:
         annot = Annotation.objects(id=abu.annotation_id).first()
     else:
         annot = Annotation(
-            username=username,
-            project=project_name,
+            username=abu.username,
+            project=abu.project_name,
             document_id=doc.id,
         )
         annot.save()
         abu.annotation_id = annot.id
-        abu.save()
+    if set_state:
+        abu.annotation_state = set_state
+    abu.save()
+    return annot, doc
+
+
+def _get_abu_response(annot: Annotation, doc: Document, highlights):
+    return {
+        'annotation_id': annot.id,
+        'comment': annot.comment,
+        'responses': annot.responses,
+        'name': doc.document_name,
+        'metadata': doc.metadata,
+        'text': doc.text,
+        'highlights': doc.highlights,
+        'offsets': doc.offsets,
+        'labels': doc.labels,
+        'sentences': _get_highlighted_sentences(doc, highlights),
+        'preview': _get_preview(doc),
+    }
+
+
+def get_annotation_by_id(project_name, annotation_id, username, highlights=None):
+    abu = AnnotationByUser.objects(project_name=project_name,
+                                   username=username,
+                                   annotation_id=annotation_id
+                                   ).first()
+    annot, doc = _get_or_create_annotation(abu)
+    return _get_abu_response(annot, doc, highlights)
+
+
+def get_next_annotation(project_name, username, highlights=None):
+    if not (abu := get_next_abu(project_name, username)):
+        return None
+    annot, doc = _get_or_create_annotation(abu, set_state=AnnotationState.IN_PROGRESS)
+    return _get_abu_response(annot, doc, highlights)
+
+
+def _get_preview(doc):
     preview = []
+    for offset in sorted(doc.offsets):
+        preview.append(doc.text[offset.start:offset.end])
+    return preview
+
+
+def _get_highlighted_sentences(doc, highlights):
     sentences = []
     highlights = doc.highlights + highlights if highlights else []
     pat = None if not highlights else re.compile(rf"\b({'|'.join(rx for rx in highlights if rx)})\w*\b", re.IGNORECASE)
@@ -82,21 +124,7 @@ def get_next_annotation(project_name, username, highlights=None):
         })
         sentences.append(sentence)
         start = sent_end
-    for offset in sorted(doc.offsets):
-        preview.append(doc.text[offset.start:offset.end])
-    return {
-        'annotation_id': annot.id,
-        'comment': annot.comment,
-        'responses': annot.responses,
-        'name': doc.document_name,
-        'metadata': doc.metadata,
-        'text': doc.text,
-        'highlights': doc.highlights,
-        'offsets': doc.offsets,
-        'labels': doc.labels,
-        'sentences': sentences,
-        'preview': preview,
-    }
+    return sentences
 
 
 def get_annotation(annot_id):

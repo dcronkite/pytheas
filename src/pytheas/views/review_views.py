@@ -47,9 +47,27 @@ def reviewer(project_url_name):
         }
 
 
-@blueprint.route('/project/review/<string:project_url_name>/<string:annotation_id>', methods=['POST'])
+@blueprint.route('/project/review/<string:project_url_name>/<string:annotation_id>')
 @login_required
-def update_comment(project_url_name, annotation_id):
+@response(template_file='review/reviewer.html')
+def reviewer_specific(project_url_name, annotation_id):
+    project_name = urllib.parse.unquote_plus(project_url_name)
+    annot = annotation_service.get_annotation_by_id(project_name, annotation_id, user_service.get_current_username())
+    if annot:
+        return {
+            'user': user_service.get_current_user(),
+            'project': project_service.get_project_details(project_name),
+            'document': annot,
+        }
+    else:
+        return {
+
+        }
+
+
+@blueprint.route('/project/review/<string:project_url_name>/<string:annotation_id>/update', methods=['POST'])
+@login_required
+def update(project_url_name, annotation_id):
     data = flask.request.get_json()
     errors = []
     try:
