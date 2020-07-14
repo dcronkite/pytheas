@@ -69,10 +69,14 @@
             >Exit</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link"
-               href="/project/{{ project.name_url }}"
-               onclick="saveAll()"
-            >Back</a>
+            {% if previous %}
+                <a class="nav-link"
+                   href="/project/review/{{ project.name_url }}/{{ previous }}"
+                   onclick="saveAll()"
+                >Previous</a>
+            {% else %}
+                <button class="nav-link" disabled="disabled">Previous</button>
+            {% endif %}
         </li>
         <li class="nav-item">
             <div class="btn-group btn-group-justified" data-toggle="buttons">
@@ -94,7 +98,7 @@
         </li>
         <li class="nav-item">
             <a class="nav-link"
-               href="/project/{{ project.name_url }}"
+               href="/project/review/{{ project.name_url }}"
                onclick="saveAll()"
             >Next</a>
         </li>

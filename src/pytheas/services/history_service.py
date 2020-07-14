@@ -26,3 +26,12 @@ def write_history(annotation_id, project_name, username, document_name, how: His
         annotation_id=annotation_id,
         how=how.name,
     ).save()
+
+
+def get_previous_annotation_id(project_name, username, curr_annotation_id):
+    h = History.objects(
+        project_name=project_name,
+        username=username,
+        annotation_id__ne=curr_annotation_id,
+    ).order_by('-update_date').first()
+    return h.annotation_id if h else None

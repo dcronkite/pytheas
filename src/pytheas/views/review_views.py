@@ -44,13 +44,17 @@ def _make_reviewer_response(annot, project_name):
             'user': user_service.get_current_user(),
             'project': project_service.get_project_details(project_name),
             'document': annot,
-            'history': history_service.get_history_for_link(project_name, user_service.get_current_username())
+            'history': history_service.get_history_for_link(project_name, user_service.get_current_username()),
+            'previous': history_service.get_previous_annotation_id(project_name, user_service.get_current_username(),
+                                                                   annot['annotation_id']),
         }
     else:
         return {
             'user': user_service.get_current_user(),
             'project': project_service.get_project_details(project_name),
-            'history': history_service.get_history_for_link(project_name, user_service.get_current_username())
+            'history': history_service.get_history_for_link(project_name, user_service.get_current_username()),
+            'previous': history_service.get_previous_annotation_id(project_name, user_service.get_current_username(),
+                                                                   annot['annotation_id']),
         }
 
 
