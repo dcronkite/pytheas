@@ -5,6 +5,8 @@ from pytheas.data.annotation_by_user import AnnotationByUser
 from pytheas.data.annotation_state import AnnotationState
 from pytheas.data.annotations import Annotation
 from pytheas.data.documents import Document
+from pytheas.data.histories import HistoryHow
+from pytheas.services.history_service import write_history
 
 
 def get_annotation_responses(project_name, username):
@@ -73,6 +75,7 @@ def get_annotation_by_id(project_name, annotation_id, username, highlights=None)
                                    annotation_id=annotation_id
                                    ).first()
     annot, doc = _get_or_create_annotation(abu)
+    write_history(annotation_id, project_name, username, doc.document_name, how=HistoryHow.BY_ANNOT_ID)
     return _get_abu_response(annot, doc, highlights)
 
 
@@ -80,6 +83,7 @@ def get_next_annotation(project_name, username, highlights=None):
     if not (abu := get_next_abu(project_name, username)):
         return None
     annot, doc = _get_or_create_annotation(abu, set_state=AnnotationState.IN_PROGRESS)
+    write_history(annot.id, project_name, username, doc.document_name, how=HistoryHow.NEXT)
     return _get_abu_response(annot, doc, highlights)
 
 

@@ -110,7 +110,7 @@
         <ul>
             {% for item in history %}
                 <li>
-                    <a href="/project/{{ project.name_url }}/{{ item.document_name }}">{{ item.document_name }}</a> {{ item.completed_date }}
+                    <a href="/project/review/{{ project.name_url }}/{{ item.annotation_id }}">{{ item.document_name }}</a> {{ item.update_date }}
                 </li>
             {% endfor %}
         </ul>

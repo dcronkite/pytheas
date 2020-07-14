@@ -9,7 +9,7 @@ class HomeViewModel(ViewModelBase):
         super().__init__()
         self.corpus_path = self.request_dict.corpus_path
         self.name = self.request_dict.name
-        self.project = self.request_dict.project
+        self.project = self.request_dict.project_name
         self.previous_corpora = service.get_previous_corpora()
         self.previous_corpus_path = self.request_dict.previous_corpus_path
 
