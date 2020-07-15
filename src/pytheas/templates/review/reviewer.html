@@ -1,3 +1,4 @@
+{% set button_colors = ['btn-primary', 'btn-secondary', 'btn-warning', 'btn-info', 'btn-success', 'btn-danger', 'btn-default'] %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -94,7 +95,7 @@
             <div class="btn-group btn-group-justified" data-toggle="buttons">
                 {% for label in document.labels %}
                     <label for="label_value_{{ label }}"
-                           class="btn btn-primary {% if label in document.responses %} active {% endif %}"
+                           class="btn {{ button_colors[loop.index0 % button_colors | length] }} {% if label in document.responses %} active {% endif %}"
                            onclick="saveResponses(this)"
                     >
                         <input id="label_value_{{ label }}"
@@ -192,7 +193,9 @@
         </div>
         <ul>
             {% for highlight in document.highlights %}
-                <li>{{ highlight }} <button class="btn-danger" onclick="removeRegex('{{ highlight }}')">Remove</button></li>
+                <li>{{ highlight }}
+                    <button class="btn-danger" onclick="removeRegex('{{ highlight }}')">Remove</button>
+                </li>
             {% endfor %}
         </ul>
     </div>
