@@ -3,7 +3,7 @@ from flask_login import login_required
 
 import urllib.parse
 
-from pytheas.services import service, user_service, project_service, annotation_service, history_service
+from pytheas.services import service, user_service, project_service, annotation_service, history_service, abu_service
 from pytheas.utils.view_modifiers import response
 from pytheas.viewmodels.review_viewmodel import ReviewViewModel
 
@@ -38,20 +38,22 @@ def reviewer(project_url_name):
 
 
 def _make_reviewer_response(annot, project_name):
+    username = user_service.get_current_username()
     if annot:
         return flask.render_template('review/reviewer.html', **{
             'user': user_service.get_current_user(),
             'project': project_service.get_project_details(project_name),
             'document': annot,
-            'history': history_service.get_history_for_link(project_name, user_service.get_current_username()),
-            'previous': history_service.get_previous_annotation_id(project_name, user_service.get_current_username(),
+            'history': history_service.get_history_for_link(project_name, username),
+            'previous': history_service.get_previous_annotation_id(project_name, username,
                                                                    annot['annotation_id']),
+            'progress': abu_service.get_abu_progress(project_name, username)
         })
     else:
         return flask.render_template('review/done.html', **{
             'user': user_service.get_current_user(),
             'project': project_service.get_project_details(project_name),
-            'history': history_service.get_history_for_link(project_name, user_service.get_current_username()),
+            'history': history_service.get_history_for_link(project_name, username),
             'previous': None,
         })
 

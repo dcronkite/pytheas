@@ -59,6 +59,18 @@
     {% endfor %}
 </div>
 
+<div class="progress" style="height:30px">
+    <div class="progress-bar" role="progressbar" style="width:{{ progress.done.percent }}%;height:30px">
+        {{ progress.done.count }} Done
+    </div>
+    <div class="progress-bar bg-info" role="progressbar" style="width:{{ progress.in_progress.percent }}%;height:30px">
+        {{ progress.in_progress.count }} In progress
+    </div>
+    <div class="progress-bar bg-danger" role="progressbar" style="width:{{ progress.ready.percent }}%;height:30px">
+        {{ progress.ready.count }} Ready
+    </div>
+</div>
+
 {#<nav class="navbar navbar-expand-sm bg-dark navbar-dark fixed-top">#}
 <nav class="navbar navbar-expand-sm bg-dark navbar-dark sticky-top">
     <ul class="navbar-nav">
