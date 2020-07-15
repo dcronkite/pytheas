@@ -3,7 +3,8 @@ from flask_login import login_required
 
 import urllib.parse
 
-from pytheas.services import service, user_service, project_service, annotation_service, history_service, abu_service
+from pytheas.services import service, user_service, project_service, annotation_service, history_service, abu_service, \
+    highlight_service
 from pytheas.utils.view_modifiers import response
 from pytheas.viewmodels.review_viewmodel import ReviewViewModel
 
@@ -88,6 +89,32 @@ def update(project_url_name, annotation_id):
             'header': 'Save Comment Failed',
             'message': str(e)
         })
+    return {
+        'errors': errors,
+    }
+
+
+@blueprint.route('/project/review/<string:project_url_name>/regex/add', methods=['POST'])
+@login_required
+def add_regex(project_url_name):
+    errors = []
+    data = flask.request.get_json()
+    project_name = urllib.parse.unquote_plus(project_url_name)
+    highlight_service.add_highlight(user_service.get_current_username(), project_name, data['regex'])
+    return {
+        'errors': errors,
+    }
+
+
+@blueprint.route('/project/review/<string:project_url_name>/regex/remove', methods=['POST'])
+@login_required
+def remove_regex(project_url_name):
+    errors = []
+    data = flask.request.get_json()
+    project_name = urllib.parse.unquote_plus(project_url_name)
+    res = highlight_service.remove_highlight(user_service.get_current_username(), project_name, data['regex'])
+    if res:
+        errors.append(res)
     return {
         'errors': errors,
     }

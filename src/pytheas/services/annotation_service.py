@@ -7,6 +7,7 @@ from pytheas.data.annotation_state import AnnotationState
 from pytheas.data.annotations import Annotation
 from pytheas.data.documents import Document
 from pytheas.data.histories import HistoryHow
+from pytheas.services import highlight_service
 from pytheas.services.history_service import write_history
 
 
@@ -55,6 +56,7 @@ def _get_or_create_annotation(abu: AnnotationByUser, set_state: AnnotationState 
 
 
 def _get_abu_response(annot: Annotation, doc: Document, highlights):
+    highlights = doc.highlights + highlights if highlights else []
     return {
         'annotation_id': annot.id,
         'comment': annot.comment,
@@ -62,7 +64,7 @@ def _get_abu_response(annot: Annotation, doc: Document, highlights):
         'name': doc.document_name,
         'metadata': doc.metadata,
         'text': doc.text,
-        'highlights': doc.highlights,
+        'highlights': highlights,
         'offsets': doc.offsets,
         'labels': doc.labels,
         'sentences': _get_highlighted_sentences(doc, highlights),
@@ -77,6 +79,8 @@ def get_annotation_by_id(project_name, annotation_id, username, highlights=None)
                                    ).first()
     annot, doc = _get_or_create_annotation(abu)
     write_history(annotation_id, project_name, username, doc.document_name, how=HistoryHow.BY_ANNOT_ID)
+    if highlights is None:
+        highlights = highlight_service.get_highlights(username, project_name)
     return _get_abu_response(annot, doc, highlights)
 
 
@@ -85,6 +89,8 @@ def get_next_annotation(project_name, username, highlights=None):
         return None
     annot, doc = _get_or_create_annotation(abu, set_state=AnnotationState.IN_PROGRESS)
     write_history(annot.id, project_name, username, doc.document_name, how=HistoryHow.NEXT)
+    if highlights is None:
+        highlights = highlight_service.get_highlights(username, project_name)
     return _get_abu_response(annot, doc, highlights)
 
 
@@ -97,8 +103,8 @@ def _get_preview(doc):
 
 def _get_highlighted_sentences(doc, highlights):
     sentences = []
-    highlights = doc.highlights + highlights if highlights else []
-    pat = None if not highlights else re.compile(rf"\b({'|'.join(rx for rx in highlights if rx)})\w*\b", re.IGNORECASE)
+    pat = None if not highlights else re.compile(rf"\b({'|'.join(re.escape(rx) for rx in highlights if rx)})\w*\b",
+                                                 re.IGNORECASE)
     start = 0
     for line in doc.text.split('\n'):
         sent_start = start

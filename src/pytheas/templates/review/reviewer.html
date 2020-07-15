@@ -78,7 +78,7 @@
             <a class="nav-link"
                href="/project/{{ project.name_url }}"
                onclick="saveAll()"
-            >Exit</a>
+            >Save and Exit</a>
         </li>
         <li class="nav-item">
             {% if previous %}
@@ -93,7 +93,8 @@
         <li class="nav-item">
             <div class="btn-group btn-group-justified" data-toggle="buttons">
                 {% for label in document.labels %}
-                    <label for="label_value_{{ label }}" class="btn btn-primary {% if label in document.responses %} active {% endif %}"
+                    <label for="label_value_{{ label }}"
+                           class="btn btn-primary {% if label in document.responses %} active {% endif %}"
                            onclick="saveResponses(this)"
                     >
                         <input id="label_value_{{ label }}"
@@ -121,7 +122,8 @@
 
     <div class="card col-3 form-group">
         <label for="comment">Comment:</label>
-        <textarea class="form-control" rows="5" id="comment">{% if document.comment %}{{ document.comment }}{% endif %}</textarea>
+        <textarea class="form-control" rows="5" id="comment">{% if document.comment %}
+            {{ document.comment }}{% endif %}</textarea>
         <h2>History</h2>
         <ul>
             {% for item in history %}
@@ -172,9 +174,25 @@
             </div>
         </div>
         <h2>Highlight</h2>
+        <div class="form-group">
+            <label for="regex">Add Search Term</label>
+            <input type="text" class="form-control" id="regex">
+            <button class="btn-info" onclick="addRegex()">Add</button>
+        </div>
+        <div id="refresh-button" hidden="hidden">
+            <p>
+                <a
+                        href="/project/review/{{ project.name_url }}/{{ document.annotation_id }}"
+                        onclick="saveAll()"
+                >
+                    REFRESH
+                </a>
+                to apply changes
+            </p>
+        </div>
         <ul>
             {% for highlight in document.highlights %}
-                <li>{{ highlight }}</li>
+                <li>{{ highlight }} <button class="btn-danger" onclick="removeRegex('{{ highlight }}')">Remove</button></li>
             {% endfor %}
         </ul>
     </div>
@@ -184,6 +202,8 @@
     /* constants */
     const commentBlock = document.getElementById('comment');
     const responsesOptions = document.getElementsByName('document-options');
+    const regex = document.getElementById('regex');
+    const refreshDiv = document.getElementById('refresh-button');
 
     /* toasts */
     const toast = $('#toast');
@@ -288,6 +308,62 @@
                 }
                 toast.toast('show');
             });
+    }
+
+    function addRegex() {
+        let newValue = regex.value;
+        regex.value = '';
+        fetch('/project/review/{{ project.name_url }}/regex/add', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                'regex': newValue,
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                refreshDiv.hidden = false;
+                if (data['errors'].length > 0) {
+                    toastHeader.innerText = data['errors'][0]['header'];
+                    toastMessage.innerText = data['errors'][0]['message'];
+                    toastMini.innerText = `${data['errors'].length} errors`
+                } else {
+                    toastHeader.innerText = 'Search Term Added';
+                    toastMini.innerText = 'Just now...';
+                    toastMessage.innerText = 'Refresh to show updates on this page';
+                }
+                toast.toast('show');
+            })
+    }
+
+    function removeRegex(regexValue) {
+        fetch('/project/review/{{ project.name_url }}/regex/remove', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                'regex': regexValue,
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                refreshDiv.hidden = false;
+                if (data['errors'].length > 0) {
+                    toastHeader.innerText = data['errors'][0]['header'];
+                    toastMessage.innerText = data['errors'][0]['message'];
+                    toastMini.innerText = `${data['errors'].length} errors`
+                } else {
+                    toastHeader.innerText = 'Search Term Removed';
+                    toastMini.innerText = 'Just now...';
+                    toastMessage.innerText = 'Refresh to show updates on this page';
+                }
+                toast.toast('show');
+            })
     }
 
     /* listeners */
