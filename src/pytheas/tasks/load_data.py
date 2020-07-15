@@ -33,7 +33,9 @@ def resolve_expiration_date(*dates):
 
 
 def add_documents_to_user(upload: Upload, project_name: str, subproject_name: str, username: str, document_list,
-                          connections, labels=None, order=0, end_date=None):
+                          connections, labels=None, order=0, end_date=None, highlights=None):
+    if not highlights:
+        highlights = list()
     for document in document_list:
         name = document['name']
         text = document.get('text', None)
@@ -51,7 +53,7 @@ def add_documents_to_user(upload: Upload, project_name: str, subproject_name: st
             text=str(text),
             project_name=project_name,
             order=document.get('order', order),
-            highlights=document.get('highlights', list()),
+            highlights=document.get('highlights', list()) + highlights,
             expiration_date=resolve_expiration_date(document.get('expiration_date', None), end_date),
             offsets=[Highlight(**offset) for offset in document.get('offsets', list())],
             labels=document.get('labels', labels)
@@ -88,7 +90,7 @@ def _load_json_to_database(filepath, upload: Upload):
 
     subproject_name = data.get('subproject', f'{project.name}_{uuid.uuid4()}')
     labels = data.get('labels', None)
-
+    highlights = data.get('highlights', list())
     documents = data.get('documents', [])
     document_index = 0
     start_index = 0
@@ -104,7 +106,8 @@ def _load_json_to_database(filepath, upload: Upload):
                               user.get('documents', []),
                               connections,
                               labels=labels,
-                              end_date=project.end_date)
+                              end_date=project.end_date,
+                              highlights=highlights)
         add_documents_to_user(upload,
                               project.name,
                               subproject_name,
@@ -113,6 +116,7 @@ def _load_json_to_database(filepath, upload: Upload):
                               connections,
                               labels=labels,
                               end_date=project.end_date,
+                              highlights=highlights
                               )
         if n_users == user_index + 1:  # last user
             end_index = None
@@ -133,6 +137,7 @@ def _load_json_to_database(filepath, upload: Upload):
                               connections,
                               labels=labels,
                               end_date=project.end_date,
+                              highlights=highlights
                               )
     return True
 
