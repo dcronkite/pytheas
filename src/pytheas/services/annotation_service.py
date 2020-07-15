@@ -108,7 +108,7 @@ def _get_highlighted_sentences(doc, highlights):
     start = 0
     for line in doc.text.split('\n'):
         sent_start = start
-        sent_end = sent_start + len(line)
+        sent_end = sent_start + len(line) + 1
         emphasize = False
         for offset in doc.offsets:
             if sent_start <= offset.start < sent_end or sent_start <= offset.end < sent_end:
