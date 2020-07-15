@@ -30,6 +30,6 @@ class Connection:
 
     def _get_from_sql(self, document_name):
         eng = sqlai.get_engine(self.name, driver=self.driver, server=self.server, database=self.database)
-        for text in eng.execute(f'select {self.text_col} from {self.name} where {self.name_col} = "{document_name}"'):
-            return text
+        for text in eng.execute(f"select {self.text_col} from {self.name} where {self.name_col} = '{document_name}'"):
+            return text[0]
         return None

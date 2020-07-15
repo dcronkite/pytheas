@@ -9,6 +9,7 @@ class AnnotationByUser(mongoengine.Document):
     username = mongoengine.StringField()
     document_id = mongoengine.ObjectIdField()
     project_name = mongoengine.StringField()
+    subproject_name = mongoengine.StringField()
     annotation_id = mongoengine.ObjectIdField()
     created_date = mongoengine.DateTimeField(default=datetime.datetime.now)
     annotation_state = EnumField(enum_class=AnnotationState)

@@ -23,10 +23,10 @@ def get_abu_details(project_name, username):
 
 
 def get_abu_progress(project_name, username):
-    data = {}
+    data = {AnnotationState.READY.name: 0, AnnotationState.IN_PROGRESS.name: 0, AnnotationState.DONE.name: 0}
     for abu in _get_abu_counts(project_name, username):
         state = AnnotationState(abu['_id'])
-        if state in {AnnotationState.READY, AnnotationState.IN_PROGRESS, AnnotationState.DONE}:
+        if state.name in data:
             data[state.name] = abu['count']
     total = sum(data.values())
     return {s.lower(): {'percent': round(100 * c / total), 'count': c} for s, c in data.items()}

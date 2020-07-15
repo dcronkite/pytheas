@@ -1,6 +1,7 @@
 import datetime
 import json
 import os
+import uuid
 
 import jsonschema
 
@@ -31,8 +32,8 @@ def resolve_expiration_date(*dates):
     return datetime.datetime.now() + datetime.timedelta(days=91)
 
 
-def add_documents_to_user(upload: Upload, project_name: str, username: str, document_list, connections,
-                          labels=None, order=0, end_date=None):
+def add_documents_to_user(upload: Upload, project_name: str, subproject_name: str, username: str, document_list,
+                          connections, labels=None, order=0, end_date=None):
     for document in document_list:
         name = document['name']
         text = document.get('text', None)
@@ -47,7 +48,7 @@ def add_documents_to_user(upload: Upload, project_name: str, username: str, docu
             document_name=name,
             metadata=document.get('metadata', dict()),
             username=username,
-            text=text,
+            text=str(text),
             project_name=project_name,
             order=document.get('order', order),
             highlights=document.get('highlights', list()),
@@ -61,6 +62,7 @@ def add_documents_to_user(upload: Upload, project_name: str, username: str, docu
             username=username,
             document_id=doc.id,
             project_name=project_name,
+            subproject_name=subproject_name,
             annotation_state=AnnotationState.READY,
         )
         abu.save()
@@ -84,6 +86,7 @@ def _load_json_to_database(filepath, upload: Upload):
     except Exception as e:
         raise ValueError(f'Project does not exist: {data["project"]}, {e}')
 
+    subproject_name = data.get('subproject', f'{project.name}_{uuid.uuid4()}')
     labels = data.get('labels', None)
 
     documents = data.get('documents', [])
@@ -96,6 +99,7 @@ def _load_json_to_database(filepath, upload: Upload):
             raise ValueError(f'User not part of project: {user["name"]}, {project.name}')
         add_documents_to_user(upload,
                               project.name,
+                              subproject_name,
                               user['name'],
                               user.get('documents', []),
                               connections,
@@ -103,6 +107,7 @@ def _load_json_to_database(filepath, upload: Upload):
                               end_date=project.end_date)
         add_documents_to_user(upload,
                               project.name,
+                              subproject_name,
                               user['name'],
                               data.get('irr_documents', []),
                               connections,
@@ -122,6 +127,7 @@ def _load_json_to_database(filepath, upload: Upload):
             document_index = end_index
         add_documents_to_user(upload,
                               project.name,
+                              subproject_name,
                               user['name'],
                               documents[start_index:end_index],
                               connections,
@@ -136,6 +142,7 @@ def load_data():
         data_dir = app.config['DATA_DIR']
         names = {upload.name for upload in Upload.objects(completed=True)}
         # TODO: handle incomplete uploads
+        print(data_dir)
         for root, dirs, files in os.walk(data_dir):
             for file in files:
                 print(file)

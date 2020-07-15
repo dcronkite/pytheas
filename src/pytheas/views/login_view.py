@@ -39,7 +39,6 @@ def login():
                     )
                     if user_is_valid:
                         login_user(check_user, remember=form.remember_me.data)
-
                         return redirect(url_for('home.index'))
                 elif check_password_hash(check_user.hashed_password, form.password.data):
                     login_user(check_user, remember=form.remember_me.data)
