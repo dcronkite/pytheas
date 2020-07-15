@@ -31,7 +31,6 @@ def review_post():
 
 @blueprint.route('/project/review/<string:project_url_name>')
 @login_required
-@response(template_file='review/reviewer.html')
 def reviewer(project_url_name):
     project_name = urllib.parse.unquote_plus(project_url_name)
     annot = annotation_service.get_next_annotation(project_name, user_service.get_current_username())
@@ -40,27 +39,25 @@ def reviewer(project_url_name):
 
 def _make_reviewer_response(annot, project_name):
     if annot:
-        return {
+        return flask.render_template('review/reviewer.html', **{
             'user': user_service.get_current_user(),
             'project': project_service.get_project_details(project_name),
             'document': annot,
             'history': history_service.get_history_for_link(project_name, user_service.get_current_username()),
             'previous': history_service.get_previous_annotation_id(project_name, user_service.get_current_username(),
                                                                    annot['annotation_id']),
-        }
+        })
     else:
-        return {
+        return flask.render_template('review/done.html', **{
             'user': user_service.get_current_user(),
             'project': project_service.get_project_details(project_name),
             'history': history_service.get_history_for_link(project_name, user_service.get_current_username()),
-            'previous': history_service.get_previous_annotation_id(project_name, user_service.get_current_username(),
-                                                                   annot['annotation_id']),
-        }
+            'previous': None,
+        })
 
 
 @blueprint.route('/project/review/<string:project_url_name>/<string:annotation_id>')
 @login_required
-@response(template_file='review/reviewer.html')
 def reviewer_specific(project_url_name, annotation_id):
     project_name = urllib.parse.unquote_plus(project_url_name)
     annot = annotation_service.get_annotation_by_id(project_name, annotation_id, user_service.get_current_username())
@@ -69,7 +66,6 @@ def reviewer_specific(project_url_name, annotation_id):
 
 @blueprint.route('/project/review/<string:project_url_name>/<string:annotation_id>/next')
 @login_required
-@response(template_file='review/reviewer.html')
 def reviewer_next(project_url_name, annotation_id):
     project_name = urllib.parse.unquote_plus(project_url_name)
     username = user_service.get_current_username()
