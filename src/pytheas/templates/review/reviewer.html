@@ -1,4 +1,4 @@
-{% set button_colors = ['btn-primary', 'btn-secondary', 'btn-warning', 'btn-info', 'btn-success', 'btn-danger', 'btn-default'] %}
+{% set button_colors = ['btn-primary', 'btn-secondary', 'btn-info', 'btn-success', 'btn-danger'] %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,6 +17,29 @@
     {#    <link href="/static/css/jquery-ui.structure.min.css" rel="stylesheet" type="text/css">#}
     {#    <link href="/static/css/jquery-ui.theme.min.css" rel="stylesheet" type="text/css">#}
 
+
+    <style>
+        {% block style %}
+        {% endblock %}
+
+        .word_emphasize {
+            font-weight: bold;
+        }
+
+        .word_highlight {
+            background-color: lime;
+        }
+
+        label {
+            border-width: 5px !important;
+        }
+        label.active {
+            border-color: darkorange !important;
+            border-style: solid;
+            border-width: 5px;
+        }
+
+    </style>
     <link href="/static/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
           rel="stylesheet">
@@ -30,22 +53,11 @@
     {% endblock %}
 
 
-    <style>
-        {% block style %}
-        {% endblock %}
-
-        .word_emphasize {
-            font-weight: bold;
-        }
-
-        .word_highlight {
-            background-color: lime;
-        }
-    </style>
 
     <script src="/static/js/bootstrap.min.js"></script>
     <script src="/static/js/jquery.min.js"></script>
     <script src="/static/js/bootstrap.bundle.min.js"></script>
+
 </head>
 <body>
 
@@ -94,19 +106,23 @@
         <li class="nav-item">
             <div class="btn-group btn-group-justified" data-toggle="buttons">
                 {% for label in document.labels %}
-                    <label for="label_value_{{ label }}"
-                           class="btn {{ button_colors[loop.index0 % button_colors | length] }} {% if label in document.responses %} active {% endif %}"
-                           onclick="saveResponses(this)"
-                    >
+                    <div class="custom-control custom-checkbox">
                         <input id="label_value_{{ label }}"
                                type="checkbox"
                                value="{{ label }}"
                                name="document-options"
                                data-toggle="button"
+                               style="display: none;"
                                {% if label in document.responses %}checked="checked"{% endif %}
                         >
-                        {{ label }}
-                    </label>
+                        <label for="label_value_{{ label }}"
+                               class="btn {{ button_colors[loop.index0 % button_colors | length] }} {% if label in document.responses %} active {% endif %}"
+                               onclick="saveResponseFromLabel(this)"
+                        >
+                            {{ label }}
+                        </label>
+                    </div>
+
                 {% endfor %}
             </div>
         </li>
@@ -252,15 +268,30 @@
         });
         return results;
     }
+    console.log(getResponses());
 
-    function saveResponses(target) {
-        let inputField = document.getElementById(target.htmlFor);
-        console.log(target);
-        console.log(target.htmlFor);
-        console.log(inputField);
-        inputField.checked = true;
+    function saveResponseFromLabel(labelField) {
+        console.log('from label')
+        console.log(labelField)
+        let inputField = document.getElementById(labelField.htmlFor);
+        // checkbox not clicked
+        inputField.checked = ! (inputField.checked);
+        console.log(inputField.checked);
+        saveResponses(inputField);
+    }
+
+    function saveResponseFromInput(inputField) {
+        console.log('from input')
+        // checkbox already clicked, but label will also fire
+        {#inputFieldEvent.stopImmediatePropagation();#}
+        {#inputField.checked = ! (inputField.checked);#}
+        {#inputFieldEvent.preventDefault();#}
+        console.log(inputField.checked);
+        saveResponses(inputField);
+    }
+
+    function saveResponses(inputField) {
         let responses = getResponses();
-        console.log(responses);
         fetch('/project/review/{{ project.name_url }}/{{ document.annotation_id }}/update', {
             method: 'POST',
             headers: {
