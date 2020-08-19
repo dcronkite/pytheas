@@ -1,7 +1,7 @@
 import flask
 from flask_login import login_required
 
-from pytheas.services import service, user_service
+from pytheas.services import service, user_service, tool_service
 from pytheas.utils.view_modifiers import response
 from pytheas.viewmodels.home_viewmodel import HomeViewModel
 
@@ -15,6 +15,7 @@ def index():
     return {
         'user': user_service.get_display_name(),
         'projects': user_service.get_projects(),
+        'tools': tool_service.get_all_tools(),
     }
 
 

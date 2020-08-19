@@ -84,12 +84,14 @@ def register_blueprints():
     from pytheas.views import admin_views
     from pytheas.views import login_view
     from pytheas.views import project_views
+    from pytheas.views import tool_views
 
     app.register_blueprint(home_views.blueprint)
     app.register_blueprint(review_views.blueprint)
     app.register_blueprint(admin_views.blueprint)
     app.register_blueprint(login_view.blueprint)
     app.register_blueprint(project_views.blueprint)
+    app.register_blueprint(tool_views.blueprint)
 
 
 def create_scheduled_jobs():

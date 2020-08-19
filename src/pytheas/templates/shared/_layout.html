@@ -22,9 +22,9 @@
 
     <!-- Custom styles for this template-->
     <link href="/static/css/sb-admin-2.min.css" rel="stylesheet">
-{#    <link href="/static/css/nouislider.min.css" rel="stylesheet">#}
+    {#    <link href="/static/css/nouislider.min.css" rel="stylesheet">#}
 
-{#    <link href="/static/css/star-rating.min.css" rel="stylesheet">#}
+    {#    <link href="/static/css/star-rating.min.css" rel="stylesheet">#}
     {% block head %}
     {% endblock %}
 
@@ -70,13 +70,35 @@
         </div>
 
         {% for project in projects %}
-        <!-- Nav Item - Tables -->
-        <li class="nav-item">
-            <a class="nav-link" href="/project/{{ project.url_name }}">
-                <i class="fas fa-fw fa-table"></i>
-                <span>{{ project.name }}</span></a>
-        </li>
+            <!-- Nav Item - Tables -->
+            <li class="nav-item">
+                <a class="nav-link" href="/project/{{ project.url_name }}">
+                    <i class="fas fa-fw fa-table"></i>
+                    <span>{{ project.name }}</span>
+                </a>
+            </li>
         {% endfor %}
+
+        <!-- Divider -->
+        <hr class="sidebar-divider">
+        <div class="sidebar-heading">
+            Tools
+        </div>
+        <li class="nav-item">
+            <a class="nav-link" href="/tool/sandbox">
+                <i class="fas fa-fw fa-box-open"></i>
+                <span>Review Sandbox</span>
+            </a>
+        </li>
+        {% for tool in tools %}
+            <li class="nav-item">
+                <a class="nav-link" href="/tool/{{ tool.url_name }}">
+                    <i class="fas fa-fw fa-hammer"></i>
+                    <span>{{ tool.name }}</span>
+                </a>
+            </li>
+        {% endfor %}
+
 
         <!-- Divider -->
         <hr class="sidebar-divider d-none d-md-block">
