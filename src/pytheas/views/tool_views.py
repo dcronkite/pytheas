@@ -125,7 +125,7 @@ def review_connection_remove_regex(connection_name, connection_id):
     }
 
 
-@blueprint.route('/tool/review/<string:connection_name>/<string:connection_id>/previous/<string:name_url>',)
+@blueprint.route('/tool/review/<string:connection_name>/<string:connection_id>/previous/<string:name_url>', )
 @login_required
 @response(template_file='tool/reviewer.html')
 def review_connection_prev(connection_name, connection_id, name_url):
@@ -152,4 +152,14 @@ def review_connection_next(connection_name, connection_id, name_url):
         'progress': {},
         'document': doc,
         'history': [],
+    }
+
+
+@blueprint.route('/tool/review/<string:connection_name>/<string:connection_id>/response/add', methods=['POST'])
+@login_required
+def review_connection_add_response(connection_name, connection_id):
+    data = flask.request.get_json()
+    errors = connection_service.add_response(user_service.get_current_username(), connection_id, data['response'])
+    return {
+        'errors': errors
     }

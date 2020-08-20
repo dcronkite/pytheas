@@ -74,8 +74,8 @@ def _get_record(tbc_dict, order_by, c, *, inclusion_regex=None, exclusion_regex=
             return i, {
                 'name': tbc.text_name,
                 'name_url': urllib.parse.quote_plus(tbc.text_name),
-                'responses': c.options,
-                'labels': tbc.annotations,
+                'labels': c.options,
+                'responses': tbc.annotations,
                 'comment': tbc.comment,
                 'preview': [tbc.text_content[max(0, m.start() - 30): m.end() + 30]] if m else [],
                 'sentences': annotation_service.get_highlighted_sentences(tbc.text_content, highlights=c.highlights),
@@ -149,6 +149,12 @@ def update_tbc(connection_id, text_name, **fields):
     for key, value in fields.items():
         tbc[key] = value
     tbc.save()
+
+
+def add_response(username, connection_id, response):
+    c = _get_connection(connection_id)
+    c.options.append(response)
+    c.save()
 
 
 def add_regex(connection_id, regex):

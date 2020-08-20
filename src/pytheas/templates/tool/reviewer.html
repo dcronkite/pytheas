@@ -129,6 +129,23 @@
             </div>
         </li>
         <li class="nav-item">
+            <div class="form-group">
+                <input type="text" class="form-control" id="response">
+                <button class="btn-info" onclick="addResponse()">Add Response</button>
+            </div>
+            <div id="response-refresh-button" hidden="hidden">
+                <p>
+                    <a
+                            href="/tool/review/{{ connection_name }}/{{ connection_url }}"
+                            onclick="saveAll()"
+                    >
+                        REFRESH
+                    </a>
+                    to apply changes
+                </p>
+        </div>
+        </li>
+        <li class="nav-item">
             <a class="nav-link"
                href="/tool/review/{{ connection_name }}/{{ connection_url }}/next/{{ document.name_url }}"
                onclick="saveAllAndMarkDone()"
@@ -240,6 +257,8 @@
     const responsesOptions = document.getElementsByName('document-options');
     const regex = document.getElementById('regex');
     const refreshDiv = document.getElementById('refresh-button');
+    const response = document.getElementById('response');
+    const responseRefreshDiv = document.getElementById('response-refresh-button');
 
     /* toasts */
     const toast = $('#toast');
@@ -364,6 +383,35 @@
                 }
                 toast.toast('show');
             });
+    }
+
+    function addResponse() {
+        let newValue = response.value;
+        response.value = '';
+        fetch('/tool/review/{{ connection_name }}/{{ connection_url }}/response/add', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                'response': newValue,
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                responseRefreshDiv.hidden = false;
+                if (data['errors'].length > 0) {
+                    toastHeader.innerText = data['errors'][0]['header'];
+                    toastMessage.innerText = data['errors'][0]['message'];
+                    toastMini.innerText = `${data['errors'].length} errors`
+                } else {
+                    toastHeader.innerText = 'Response Added';
+                    toastMini.innerText = 'Just now...';
+                    toastMessage.innerText = 'Refresh to show updates on this page';
+                }
+                toast.toast('show');
+            })
     }
 
     function addRegex() {
