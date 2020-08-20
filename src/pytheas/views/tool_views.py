@@ -92,6 +92,17 @@ def review_connection_update(connection_name, connection_id, name_url):
     }
 
 
+@blueprint.route('/tool/review/<string:connection_name>/<string:connection_id>/mark/done/<string:name_url>',
+                 methods=['POST'])
+@login_required
+def review_connection_mark_done(connection_name, connection_id, name_url):
+    errors = []
+    connection_service.mark_done(connection_id, urllib.parse.unquote_plus(name_url))
+    return {
+        'errors': errors,
+    }
+
+
 @blueprint.route('/tool/review/<string:connection_name>/<string:connection_id>/regex/add', methods=['POST'])
 @login_required
 def review_connection_add_regex(connection_name, connection_id):
@@ -118,7 +129,6 @@ def review_connection_remove_regex(connection_name, connection_id):
 @login_required
 @response(template_file='tool/reviewer.html')
 def review_connection_prev(connection_name, connection_id, name_url):
-    connection_service.mark_done(connection_id, urllib.parse.unquote_plus(name_url))
     doc = connection_service.get_previous_record(user_service.get_current_username(), connection_id)
     return {
         'connection_name': connection_name,
@@ -134,7 +144,6 @@ def review_connection_prev(connection_name, connection_id, name_url):
 @login_required
 @response(template_file='tool/reviewer.html')
 def review_connection_next(connection_name, connection_id, name_url):
-    connection_service.mark_done(connection_id, urllib.parse.unquote_plus(name_url))
     doc = connection_service.get_next_record(user_service.get_current_username(), connection_id)
     return {
         'connection_name': connection_name,

@@ -131,7 +131,7 @@
         <li class="nav-item">
             <a class="nav-link"
                href="/tool/review/{{ connection_name }}/{{ connection_url }}/next/{{ document.name_url }}"
-               onclick="saveAll()"
+               onclick="saveAllAndMarkDone()"
             >Next</a>
         </li>
     </ul>
@@ -218,6 +218,21 @@
         </ul>
     </div>
 </div>
+
+<script>
+    function markDone() {
+        fetch('/tool/review/{{ connection_name }}/{{ connection_url }}/mark/done/{{ document.name_url }}', {
+           method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+
+            })
+        });
+    }
+</script>
 
 <script>
     /* constants */
@@ -317,6 +332,11 @@
                 }
                 toast.toast('show');
             });
+    }
+
+    function saveAllAndMarkDone() {
+        markDone();
+        saveAll();
     }
 
     function saveAll() {
