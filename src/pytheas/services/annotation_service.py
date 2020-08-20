@@ -117,9 +117,10 @@ def get_highlighted_sentences(text, highlights, offsets=None):
         sentence = []
         if pat:
             m = None
+            offset = 0
             for m in pat.finditer(line):
                 sentence.append({
-                    'text': text[sent_start:m.start() + sent_start],
+                    'text': text[sent_start + offset:m.start() + sent_start],
                     'emphasize': emphasize,
                     'highlight': False
                 })
@@ -128,6 +129,7 @@ def get_highlighted_sentences(text, highlights, offsets=None):
                     'emphasize': emphasize,
                     'highlight': True
                 })
+                offset = m.end()
             if m:
                 sent_start = m.end() + sent_start
         sentence.append({
