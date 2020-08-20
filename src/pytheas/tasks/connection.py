@@ -54,7 +54,7 @@ class Connection:
             with open(os.path.join(self.path, document_name)) as fh:
                 return fh.read()
         except Exception as e:
-            print(e)
+            print(f'Failed in to read text: {e}')
             return None
 
     def _get_from_sql(self, document_name):
@@ -91,9 +91,9 @@ class Connection:
             yield from self._get_next_from_sql()
 
     def _get_next_from_path(self):
-        for f in (f for f in pathlib.Path('*') if f.is_file()):
+        for f in (f for f in pathlib.Path(self.path).glob('*') if f.is_file()):
             try:
-                with open(f) as fh:
+                with open(f, encoding='utf8') as fh:
                     yield f.name, fh.read(), []
             except Exception as e:
                 print(e)

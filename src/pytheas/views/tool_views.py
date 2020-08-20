@@ -80,7 +80,8 @@ def review_connection(connection_name, connection_id):
     }
 
 
-@blueprint.route('/tool/review/<string:connection_name>/<string:connection_id>/update/<string:name_url>')
+@blueprint.route('/tool/review/<string:connection_name>/<string:connection_id>/update/<string:name_url>',
+                 methods=['POST'])
 @login_required
 def review_connection_update(connection_name, connection_id, name_url):
     data = flask.request.get_json()
@@ -91,7 +92,7 @@ def review_connection_update(connection_name, connection_id, name_url):
     }
 
 
-@blueprint.route('/tool/review/<string:connection_name>/<string:connection_id>/regex/add')
+@blueprint.route('/tool/review/<string:connection_name>/<string:connection_id>/regex/add', methods=['POST'])
 @login_required
 def review_connection_add_regex(connection_name, connection_id):
     errors = []
@@ -102,7 +103,7 @@ def review_connection_add_regex(connection_name, connection_id):
     }
 
 
-@blueprint.route('/tool/review/<string:connection_name>/<string:connection_id>/regex/remove')
+@blueprint.route('/tool/review/<string:connection_name>/<string:connection_id>/regex/remove', methods=['POST'])
 @login_required
 def review_connection_remove_regex(connection_name, connection_id):
     errors = []
@@ -113,10 +114,11 @@ def review_connection_remove_regex(connection_name, connection_id):
     }
 
 
-@blueprint.route('/tool/review/<string:connection_name>/<string:connection_id>/previous')
+@blueprint.route('/tool/review/<string:connection_name>/<string:connection_id>/previous/<string:name_url>',)
 @login_required
 @response(template_file='tool/reviewer.html')
-def review_connection_prev(connection_name, connection_id):
+def review_connection_prev(connection_name, connection_id, name_url):
+    connection_service.mark_done(connection_id, urllib.parse.unquote_plus(name_url))
     doc = connection_service.get_previous_record(user_service.get_current_username(), connection_id)
     return {
         'connection_name': connection_name,
@@ -128,10 +130,11 @@ def review_connection_prev(connection_name, connection_id):
     }
 
 
-@blueprint.route('/tool/review/<string:connection_name>/<string:connection_id>/next')
+@blueprint.route('/tool/review/<string:connection_name>/<string:connection_id>/next/<string:name_url>')
 @login_required
 @response(template_file='tool/reviewer.html')
-def review_connection_next(connection_name, connection_id):
+def review_connection_next(connection_name, connection_id, name_url):
+    connection_service.mark_done(connection_id, urllib.parse.unquote_plus(name_url))
     doc = connection_service.get_next_record(user_service.get_current_username(), connection_id)
     return {
         'connection_name': connection_name,
