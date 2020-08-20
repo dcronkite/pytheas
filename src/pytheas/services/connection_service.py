@@ -11,3 +11,8 @@ def check_connection(username, **conargs):
     c = Connection(username=username, **conargs)
     success, message = c.connect.test_query()
     return success, message
+
+
+def create_connection(username, **conargs):
+    c = Connection(username=username, **conargs)
+    c.save()

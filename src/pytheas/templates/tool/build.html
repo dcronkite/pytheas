@@ -29,11 +29,13 @@
         {% for connection in connections %}
             <div class="card shadow mb-4 col-sm-4">
                 <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">{{ connection.name }}</h6>
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        {{ connection.name }}
+                    </h6>
                     <a href="/tool/review/{{ connection.name_url }}"
-                       class="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm">
+                       class="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm float-left">
                         <i class="fas fa-pen fa-sm text-white-50"></i>
-                        Load
+                        Review
                     </a>
                 </div>
                 <div class="card-body">
@@ -41,13 +43,22 @@
                     <ul>
                         <li>
                             <span><b>Project:</b> {{ connection.project_name }}</span>
-                            {% if connection.server %}
+                        </li>
+                        {% if connection.server %}
+                            <li>
                                 <span><b>Table:</b> {{ connection.tablename }} ({{ connection.server }})</span>
-                            {% endif %}
-                            {% if connection.path %}
-                                <span><b>Table:</b> {{ connection.path }}</span>
-                            {% endif %}
+                            </li>
+                        {% endif %}
+
+                        {% if connection.path %}
+                            <li>
+                                <span><b>Path:</b> {{ connection.path }}</span>
+                            </li>
+                        {% endif %}
+                        <li>
                             <span><b>Created:</b> {{ connection.created_date }}</span>
+                        </li>
+                        <li>
                             <span><b>Expiration:</b> {{ connection.expiration_date }}</span>
                         </li>
                     </ul>
@@ -298,7 +309,7 @@
                     inputMessage.innerText = `Failed. ${data['message']}`;
                 }
                 inputMessage.hidden = false;
-            })
+            });
 
         }
 
@@ -313,7 +324,7 @@
                     'connection_name': inputConnectionName.value,
                     'description': inputConnectionDescription.value,
                     'project_name': inputProjectName.value,
-                    'directory_path': inputDirectoryPath.value,
+                    'path': inputDirectoryPath.value,
                     'driver': inputDriver.value,
                     'server': inputServer.value,
                     'database': inputDatabase.value,
@@ -322,7 +333,17 @@
                     'text_column': inputTextColumn.value,
                     'ad_hoc_clause': inputAdHocClause.value,
                 })
-            })
+            }).then(function (response) {
+                return response.json();
+            }).then(function (data) {
+                inputSpinner.hidden = true;
+                if (data['status']) {
+                    inputMessage.innerText = `Success! Refresh this page to see the connection. ${data['message']}`;
+                } else {
+                    inputMessage.innerText = `Failed. ${data['message']}`;
+                }
+                inputMessage.hidden = false;
+            });
         }
     </script>
 

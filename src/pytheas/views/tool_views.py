@@ -32,9 +32,20 @@ def build():
 
 @blueprint.route('/tool/connection/check', methods=['POST'])
 @login_required
-def checkConnection():
+def check_connection():
     data = flask.request.get_json()
     success, message = connection_service.check_connection(user_service.get_current_username(), **data)
+    return {
+        'status': success,
+        'message': message,
+    }
+
+
+@blueprint.route('/tool/connection/create', methods=['POST'])
+@login_required
+def create_connection():
+    data = flask.request.get_json()
+    success, message = connection_service.create_connection(user_service.get_current_username(), **data)
     return {
         'status': success,
         'message': message,
