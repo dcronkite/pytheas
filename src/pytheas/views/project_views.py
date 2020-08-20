@@ -3,7 +3,7 @@ import urllib.parse
 import flask
 from flask_login import login_required
 
-from pytheas.services import service, abu_service, project_service, user_service, annotation_service
+from pytheas.services import service, abu_service, project_service, user_service, annotation_service, tool_service
 from pytheas.utils.view_modifiers import response
 
 blueprint = flask.Blueprint('project', __name__, template_folder='../templates')
@@ -21,6 +21,7 @@ def project_home(project_url_name):
             project_name,
             user_service.get_current_username(),
         ),
+        'tools': tool_service.get_all_tools(),
         'annotation_summary': annotation_service.get_annotation_responses(
             project_name, user_service.get_current_username(),
         )

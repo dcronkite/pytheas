@@ -1,0 +1,280 @@
+{% extends "shared/_layout.html" %}
+
+{% block pre_content %}
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Connection Dashboard</h1>
+        <div>
+            <a href="#" data-toggle="modal" data-target="#downloadModal" onclick="makeNewConnection()"
+               class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                <i class="fas fa-download fa-sm text-white-50"></i>
+                New Connection
+            </a>
+            <a href="#" data-toggle="modal" data-target="#bookmarkModal"
+               class="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm">
+                <i class="fas fa-bookmark fa-sm text-white-50"></i>
+                Bookmark
+            </a>
+            <a href="#" data-toggle="modal" data-target="#feedbackModal" onclick="buildStarRatingControl()"
+               class="d-none d-sm-inline-block btn btn-sm btn-info shadow-sm">
+                <i class="fas fa-bookmark fa-sm text-white-50"></i>
+                Feedback
+            </a>
+        </div>
+    </div>
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        {% for connection in connections %}
+        <div class="card shadow mb-4 col-sm-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">{{ connection.name }}</h6>
+                <a href="/tool/review/{{ connection.name_url }}"
+                   class="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm">
+                    <i class="fas fa-pen fa-sm text-white-50"></i>
+                    Load
+                </a>
+            </div>
+            <div class="card-body">
+                {{ connection.description }}
+                <ul>
+                    <li>
+                        <span><b>Project:</b> {{ connection.project_name }}</span>
+                        {% if connection.server %}
+                            <span><b>Table:</b> {{ connection.tablename }} ({{ connection.server }})</span>
+                        {% endif %}
+                        {% if connection.path %}
+                            <span><b>Table:</b> {{ connection.path }}</span>
+                        {% endif %}
+                        <span><b>Created:</b> {{ connection.created_date }}</span>
+                        <span><b>Expiration:</b> {{ connection.expiration_date }}</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+
+    {% block main_content %}
+    {% endblock %}
+
+    {% block modals %}
+        <!-- Bookmark Modal-->
+        <div class="modal fade" id="bookmarkModal" tabindex="-1" role="dialog" aria-labelledby="bookmarkModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="bookmarkModalLabel">Create URL for Query</h5>
+                        <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <i class="fas fa-folder"></i>
+                            <label for="inputBookmarkName" class="mr-2 col-form-label-sm">Name</label>
+                            <input id="inputBookmarkName" class="form-control" type="text" minlength="4" maxlength="30"
+                                   value=""/>
+                        </div>
+                        <div class="form-group">
+                            <i class="fas fa-file-word"></i>
+                            <label for="inputBookmarkDescription">Description</label>
+                            <textarea id="inputBookmarkDescription" maxlength="100" class="md-textarea form-control"
+                                      rows="3"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <i class="fas fa-link"></i>
+                            <label for="inputBookmarkURL">Generated URL</label>
+                            <input id="inputBookmarkURL" class="form-control" type="text" readonly/>
+
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-primary" type="button" onclick="saveState()">Create Bookmark</button>
+                            <button class="btn btn-secondary" type="button" data-dismiss="modal">Dismiss</button>
+                            <button class="btn btn-warning" onclick="copyContent('inputBookmarkURL')">
+                                Copy URL
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Download Modal-->
+        <div class="modal fade" id="downloadModal" tabindex="-1" role="dialog" aria-labelledby="downloadModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="downloadModalLabel">Create New Connection</h5>
+                        <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <i class="fas fa-folder"></i>
+                            <label for="inputConnectionName" class="mr-2 col-form-label-sm">Name</label>
+                            <input id="inputConnectionName" class="form-control" type="text" minlength="4"
+                                   maxlength="30"
+                                   value=""/>
+                        </div>
+                        <div class="form-group">
+                            <i class="fas fa-file-word"></i>
+                            <label for="inputConnectionDescription">Description</label>
+                            <textarea id="inputConnectionDescription" maxlength="100" class="md-textarea form-control"
+                                      rows="3"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <i class="fas fa-folder"></i>
+                            <label for="inputProjectName" class="mr-2 col-form-label-sm">Project</label>
+                            <input id="inputProjectName" class="form-control" type="text" minlength="4" maxlength="30"
+                                   value=""/>
+                        </div>
+                        <h6>Directory</h6>
+                        <div class="form-group">
+                            <i class="fas fa-folder"></i>
+                            <label for="inputDirectoryPath" class="mr-2 col-form-label-sm">Directory Path</label>
+                            <input id="inputDirectoryPath" class="form-control" type="text" minlength="10"
+                                   maxlength="100"
+                                   value=""/>
+                        </div>
+                        <h6>Database</h6>
+                        <div class="form-group">
+                            <i class="fas fa-folder"></i>
+                            <label for="inputDriver" class="mr-2 col-form-label-sm">Driver</label>
+                            <input id="inputDriver" class="form-control" type="text" minlength="4" maxlength="30"
+                                   value="SQL Server"/>
+                        </div>
+                        <div class="form-group">
+                            <i class="fas fa-folder"></i>
+                            <label for="inputServer" class="mr-2 col-form-label-sm">Server</label>
+                            <input id="inputServer" class="form-control" type="text" minlength="4" maxlength="30"
+                                   value=""/>
+                        </div>
+                        <div class="form-group">
+                            <i class="fas fa-folder"></i>
+                            <label for="inputDatabase" class="mr-2 col-form-label-sm">Database Name</label>
+                            <input id="inputDatabase" class="form-control" type="text" minlength="4" maxlength="30"
+                                   value=""/>
+                        </div>
+                        <div class="form-group">
+                            <i class="fas fa-folder"></i>
+                            <label for="inputTablename" class="mr-2 col-form-label-sm">Table Name</label>
+                            <input id="inputTablename" class="form-control" type="text" minlength="4" maxlength="30"
+                                   value=""/>
+                        </div>
+                        <div class="form-group">
+                            <i class="fas fa-folder"></i>
+                            <label for="inputNameColumn" class="mr-2 col-form-label-sm">Name Column</label>
+                            <input id="inputNameColumn" class="form-control" type="text" minlength="2" maxlength="30"
+                                   value="ft_id"/>
+                        </div>
+                        <div class="form-group">
+                            <i class="fas fa-folder"></i>
+                            <label for="inputTextColumn" class="mr-2 col-form-label-sm">Text Column</label>
+                            <input id="inputTextColumn" class="form-control" type="text" minlength="4" maxlength="30"
+                                   value="note_text"/>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-primary" type="button" onclick="createConnection()">Create
+                                Connection
+                            </button>
+                            <button class="btn btn-secondary" type="button" data-dismiss="modal">Dismiss</button>
+                            <button class="btn btn-warning" onclick="checkConnection()">
+                                Check Connection
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Feedback Modal-->
+        <div class="modal fade" id="feedbackModal" tabindex="-1" role="dialog" aria-labelledby="feedbackModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="feedbackModalLabel">Feedback</h5>
+                        <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+
+                        <div class="form-group">
+                            <i class="fas fa-folder"></i>
+                            <label for="inputFeedbackName" class="mr-2 col-form-label-sm">Name</label>
+                            <input id="inputFeedbackName" class="form-control" type="text" minlength="4" maxlength="30"
+                                   value=""/>
+                        </div>
+                        <div class="form-group">
+                            <i class="fas fa-file-word"></i>
+                            <label for="inputFeedbackDescription">Description</label>
+                            <textarea id="inputFeedbackDescription" maxlength="100" class="md-textarea form-control"
+                                      rows="3"></textarea>
+                        </div>
+                        <select id="inputFeedbackSelect" class="star-rating">
+                            <option value="" selected>Select a rating</option>
+                            <option value="5">Excellent</option>
+                            <option value="4">Very Good</option>
+                            <option value="3">Average</option>
+                            <option value="2">Poor</option>
+                            <option value="1">Terrible</option>
+                        </select>
+                        <div class="modal-footer">
+                            <button id="submitFeedback" class="btn btn-primary" type="button"
+                                    onclick="submitFeedback()" data-dismiss="modal">Submit
+                            </button>
+                            <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endblock %}
+{% endblock %}
+
+{% block counter_scripts %}
+
+
+    <script>
+
+        var inputFeedbackName = document.getElementById('inputFeedbackName');
+        var inputFeedbackDescription = document.getElementById('inputFeedbackDescription');
+        var starRatingControl = new StarRating('.star-rating');
+
+        function buildStarRatingControl() {
+            starRatingControl.rebuild();
+        }
+
+        function submitFeedback() {
+            var rating = starRatingControl.widgets[0].selected;
+            fetch('/feedback/submit/', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    'title': inputFeedbackName.value,
+                    'description': inputFeedbackDescription.value,
+                    'rating': rating,
+                })
+            })
+                .then(function (response) {
+                    return response.json();
+                }).then(function (data) {
+                inputFeedbackName.value = '';
+                inputFeedbackDescription.value = '';
+                var options = document.querySelectorAll('#inputFeedbackSelect option');
+                for (var i = 0, l = options.length; i < l; i++) {
+                    options[i].selected = options[i].defaultSelected;
+                }
+                console.log(data['message']);
+            });
+        }
+    </script>
+{% endblock %}
