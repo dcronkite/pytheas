@@ -21,6 +21,8 @@ class Connection(mongoengine.Document):
         default=lambda: datetime.datetime.now() + datetime.timedelta(days=90)
     )
     ad_hoc_clause = mongoengine.StringField()
+    options = mongoengine.ListField(mongoengine.StringField())
+    metadata = mongoengine.ListField(mongoengine.StringField())
 
     meta = {
         'collection': 'connections',
@@ -47,4 +49,6 @@ class Connection(mongoengine.Document):
             database=self.database,
             name_col=self.name_column,
             text_col=self.text_column,
+            ad_hoc_clause=self.ad_hoc_clause,
+            metadata=self.metadata,
         )

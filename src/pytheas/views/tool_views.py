@@ -1,3 +1,5 @@
+import urllib.parse
+
 import flask
 from flask_login import login_required
 
@@ -61,3 +63,12 @@ def explore():
         'projects': user_service.get_projects(),
         'tools': tool_service.get_all_tools(),
     }
+
+
+@blueprint.route('/tool/review/<string:connection_name>/<string:connection_id>')
+@login_required
+@response(template_file='review/reviewer.html')
+def review_connection(connection_name, connection_id):
+    connection_name = urllib.parse.unquote_plus(connection_name)
+    print(connection_id)
+    return {}

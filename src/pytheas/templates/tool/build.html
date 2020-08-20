@@ -32,7 +32,7 @@
                     <h6 class="m-0 font-weight-bold text-primary">
                         {{ connection.name }}
                     </h6>
-                    <a href="/tool/review/{{ connection.name_url }}"
+                    <a href="/tool/review/{{ connection.name_url }}/{{ connection.id }}"
                        class="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm float-left">
                         <i class="fas fa-pen fa-sm text-white-50"></i>
                         Review
@@ -46,7 +46,7 @@
                         </li>
                         {% if connection.server %}
                             <li>
-                                <span><b>Table:</b> {{ connection.tablename }} ({{ connection.server }})</span>
+                                <span><b>Table:</b> {{ connection.tablename }})</span>
                             </li>
                         {% endif %}
 
@@ -195,6 +195,12 @@
                             <textarea id="inputAdHocClause" maxlength="100" class="md-textarea form-control"
                                       rows="3"></textarea>
                         </div>
+                        <div class="form-group">
+                            <i class="fas fa-folder"></i>
+                            <label for="inputOtherColumns" class="mr-2 col-form-label-sm">Other Columns (comma-separated)</label>
+                            <textarea id="inputOtherColumns" maxlength="100" class="md-textarea form-control"
+                                      rows="2"></textarea>
+                        </div>
 
                         <div id="inputSpinner" class="spinner-border text-info float-right" hidden role="status">
                             <span class="sr-only">Checking connection...</span>
@@ -276,6 +282,8 @@
         const inputAdHocClause = document.getElementById('inputAdHocClause');
         const inputSpinner = document.getElementById('inputSpinner');
         const inputMessage = document.getElementById('inputMessage');
+        const inputOtherColumns = document.getElementById('inputOtherColumns');
+
         inputSpinner.hidden = true;
 
         function checkConnection() {
@@ -298,6 +306,7 @@
                     'name_column': inputNameColumn.value,
                     'text_column': inputTextColumn.value,
                     'ad_hoc_clause': inputAdHocClause.value,
+                    'metadata': inputOtherColumns.value,
                 })
             }).then(function (response) {
                 return response.json();
