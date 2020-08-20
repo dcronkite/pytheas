@@ -19,6 +19,16 @@ class Connection:
     text_col: str = None
     ad_hoc_clause: str = None  # arbitrary where clause
     metadata: List[str] = field(default_factory=list)
+    include_regex: str = None
+    exclude_regex: str = None
+
+    @property
+    def include_rx(self):
+        return re.compile(self.include_regex, re.I) if self.include_regex else None
+
+    @property
+    def exclude_rx(self):
+        return re.compile(self.exclude_regex, re.I) if self.exclude_regex else None
 
     @property
     def extra_columns(self):
@@ -55,16 +65,24 @@ class Connection:
             return text[0]
         return None
 
+    def _join_metadata(self, metadata):
+        return {x: y for x, y in zip(self.metadata, metadata)}
+
     def iterate(self, include_regex=None, exclude_regex=None):
-        if exclude_regex:
-            exclude_regex = re.compile('({})'.format('|'.join(exclude_regex)), re.I)
-        if include_regex:
-            include_regex = re.compile('({})'.format('|'.join(include_regex)), re.I)
         for name, text, metadata in self._get_next():
             if exclude_regex and exclude_regex.search(text):
                 continue
-            if not include_regex or include_regex.search(text):
-                yield name, text, metadata
+            elif self.exclude_rx and self.exclude_rx.search(text):
+                continue
+            if include_regex and include_regex.search(text):
+                pass
+            elif self.include_rx and self.include_rx.search(text):
+                pass
+            elif include_regex or self.include_rx:
+                continue
+            else:
+                pass
+            yield name, text, self._join_metadata(metadata)
 
     def _get_next(self):
         if self.path:
@@ -76,7 +94,7 @@ class Connection:
         for f in (f for f in pathlib.Path('*') if f.is_file()):
             try:
                 with open(f) as fh:
-                    yield f.name, fh.read()
+                    yield f.name, fh.read(), []
             except Exception as e:
                 print(e)
 
@@ -119,7 +137,7 @@ class Connection:
                 return False, str(e)
             try:
                 cnt = self._get_engine().execute(
-                    f'select count(*) from {self.tablename or self.name} {ad_hoc_safe}'
+                    f'select count(*) from {self.tablename_safe} {ad_hoc_safe}'
                 ).first()
             except Exception as e:
                 return False, str(e)

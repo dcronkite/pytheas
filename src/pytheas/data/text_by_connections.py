@@ -16,6 +16,7 @@ class TextByConnection(mongoengine.Document):
     annotations = mongoengine.ListField(mongoengine.StringField())
     order = mongoengine.IntField(default=0, min_value=0, max_value=100000)
     metadata = mongoengine.DictField()
+    comment = mongoengine.StringField()
 
     meta = {
         'collection': 'text_by_connections',

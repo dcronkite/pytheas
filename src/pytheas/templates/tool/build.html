@@ -197,9 +197,22 @@
                         </div>
                         <div class="form-group">
                             <i class="fas fa-folder"></i>
-                            <label for="inputOtherColumns" class="mr-2 col-form-label-sm">Other Columns (comma-separated)</label>
+                            <label for="inputOtherColumns" class="mr-2 col-form-label-sm">Other Columns
+                                (comma-separated)</label>
                             <textarea id="inputOtherColumns" maxlength="100" class="md-textarea form-control"
                                       rows="2"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <i class="fas fa-folder"></i>
+                            <label for="inputInclusionRegex" class="mr-2 col-form-label-sm">Required Regex</label>
+                            <input id="inputInclusionRegex" class="form-control" type="text" minlength="4" maxlength="50"
+                                   value=""/>
+                        </div>
+                        <div class="form-group">
+                            <i class="fas fa-folder"></i>
+                            <label for="inputExclusionRegex" class="mr-2 col-form-label-sm">Exclusion Regex</label>
+                            <input id="inputExclusionRegex" class="form-control" type="text" minlength="4" maxlength="50"
+                                   value=""/>
                         </div>
 
                         <div id="inputSpinner" class="spinner-border text-info float-right" hidden role="status">
@@ -283,6 +296,8 @@
         const inputSpinner = document.getElementById('inputSpinner');
         const inputMessage = document.getElementById('inputMessage');
         const inputOtherColumns = document.getElementById('inputOtherColumns');
+        const inputInclusionRegex = document.getElementById('inputInclusionRegex');
+        const inputExclusionRegex = document.getElementById('inputExclusionRegex');
 
         inputSpinner.hidden = true;
 
@@ -307,6 +322,8 @@
                     'text_column': inputTextColumn.value,
                     'ad_hoc_clause': inputAdHocClause.value,
                     'metadata': inputOtherColumns.value,
+                    'include_regex': inputInclusionRegex.value,
+                    'exclude_regex': inputExclusionRegex.value,
                 })
             }).then(function (response) {
                 return response.json();

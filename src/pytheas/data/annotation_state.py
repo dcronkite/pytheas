@@ -8,3 +8,4 @@ class AnnotationState(enum.Enum):
     DELETED = 3
     ON_HOLD = 4
     NOT_READY = 5
+    SKIPPED = 6

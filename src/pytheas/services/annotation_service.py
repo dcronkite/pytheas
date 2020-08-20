@@ -67,7 +67,7 @@ def _get_abu_response(annot: Annotation, doc: Document, highlights):
         'highlights': highlights,
         'offsets': doc.offsets,
         'labels': doc.labels,
-        'sentences': _get_highlighted_sentences(doc, highlights),
+        'sentences': get_highlighted_sentences(doc.text, highlights, offsets=doc.offsets),
         'preview': _get_preview(doc),
     }
 
@@ -101,16 +101,16 @@ def _get_preview(doc):
     return preview
 
 
-def _get_highlighted_sentences(doc, highlights):
+def get_highlighted_sentences(text, highlights, offsets=None):
     sentences = []
     pat = None if not highlights else re.compile(rf"\b({'|'.join(re.escape(rx) for rx in highlights if rx)})\w*\b",
                                                  re.IGNORECASE)
     start = 0
-    for line in doc.text.split('\n'):
+    for line in text.split('\n'):
         sent_start = start
         sent_end = sent_start + len(line) + 1
         emphasize = False
-        for offset in doc.offsets:
+        for offset in offsets or []:
             if sent_start <= offset.start < sent_end or sent_start <= offset.end < sent_end:
                 emphasize = True
                 break
@@ -119,19 +119,19 @@ def _get_highlighted_sentences(doc, highlights):
             m = None
             for m in pat.finditer(line):
                 sentence.append({
-                    'text': doc.text[sent_start:m.start() + sent_start],
+                    'text': text[sent_start:m.start() + sent_start],
                     'emphasize': emphasize,
                     'highlight': False
                 })
                 sentence.append({
-                    'text': doc.text[m.start() + sent_start:m.end() + sent_start],
+                    'text': text[m.start() + sent_start:m.end() + sent_start],
                     'emphasize': emphasize,
                     'highlight': True
                 })
             if m:
                 sent_start = m.end() + sent_start
         sentence.append({
-            'text': doc.text[sent_start:sent_end],
+            'text': text[sent_start:sent_end],
             'emphasize': emphasize,
             'highlight': False,
         })

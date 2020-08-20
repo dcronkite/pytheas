@@ -23,6 +23,9 @@ class Connection(mongoengine.Document):
     ad_hoc_clause = mongoengine.StringField()
     options = mongoengine.ListField(mongoengine.StringField())
     metadata = mongoengine.ListField(mongoengine.StringField())
+    include_regex = mongoengine.StringField()
+    exclude_regex = mongoengine.StringField()
+    highlights = mongoengine.ListField(mongoengine.StringField())
 
     meta = {
         'collection': 'connections',
@@ -51,4 +54,6 @@ class Connection(mongoengine.Document):
             text_col=self.text_column,
             ad_hoc_clause=self.ad_hoc_clause,
             metadata=self.metadata,
+            include_regex=self.include_regex,
+            exclude_regex=self.exclude_regex,
         )
