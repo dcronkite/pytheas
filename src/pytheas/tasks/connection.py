@@ -84,3 +84,30 @@ class Connection:
         ):
             raise ValueError(f'Suspected SQL injection query: {ad_hoc}')
         return ad_hoc
+
+    def test_query(self):
+        if self.path:
+            path = pathlib.Path(self.path)
+            if path.exists():
+                return True, f'Path contains {len(list(path.glob("*")))} files.'
+            else:
+                return False, 'Path does not exist'
+        if self.server:
+            try:
+                ad_hoc_safe = self.ad_hoc_safe
+            except ValueError:
+                return False, 'Where clause considered unsafe.'
+            try:
+                _ = self._get_engine().execute(
+                    f'select {self.name_col}, {self.text_col} from {self.tablename or self.name} {ad_hoc_safe}'
+                ).first()
+            except Exception as e:
+                return False, str(e)
+            try:
+                cnt = self._get_engine().execute(
+                    f'select count(*) from {self.tablename or self.name} {ad_hoc_safe}'
+                ).first()
+            except Exception as e:
+                return False, str(e)
+            return True, f'Table contains {cnt[0]} records.'
+        return False, 'Must specify either Directory or Database'

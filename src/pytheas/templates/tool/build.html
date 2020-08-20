@@ -27,32 +27,32 @@
 {% block content %}
     <div class="row">
         {% for connection in connections %}
-        <div class="card shadow mb-4 col-sm-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">{{ connection.name }}</h6>
-                <a href="/tool/review/{{ connection.name_url }}"
-                   class="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm">
-                    <i class="fas fa-pen fa-sm text-white-50"></i>
-                    Load
-                </a>
+            <div class="card shadow mb-4 col-sm-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">{{ connection.name }}</h6>
+                    <a href="/tool/review/{{ connection.name_url }}"
+                       class="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm">
+                        <i class="fas fa-pen fa-sm text-white-50"></i>
+                        Load
+                    </a>
+                </div>
+                <div class="card-body">
+                    {{ connection.description }}
+                    <ul>
+                        <li>
+                            <span><b>Project:</b> {{ connection.project_name }}</span>
+                            {% if connection.server %}
+                                <span><b>Table:</b> {{ connection.tablename }} ({{ connection.server }})</span>
+                            {% endif %}
+                            {% if connection.path %}
+                                <span><b>Table:</b> {{ connection.path }}</span>
+                            {% endif %}
+                            <span><b>Created:</b> {{ connection.created_date }}</span>
+                            <span><b>Expiration:</b> {{ connection.expiration_date }}</span>
+                        </li>
+                    </ul>
+                </div>
             </div>
-            <div class="card-body">
-                {{ connection.description }}
-                <ul>
-                    <li>
-                        <span><b>Project:</b> {{ connection.project_name }}</span>
-                        {% if connection.server %}
-                            <span><b>Table:</b> {{ connection.tablename }} ({{ connection.server }})</span>
-                        {% endif %}
-                        {% if connection.path %}
-                            <span><b>Table:</b> {{ connection.path }}</span>
-                        {% endif %}
-                        <span><b>Created:</b> {{ connection.created_date }}</span>
-                        <span><b>Expiration:</b> {{ connection.expiration_date }}</span>
-                    </li>
-                </ul>
-            </div>
-        </div>
         {% endfor %}
     </div>
 
@@ -178,6 +178,18 @@
                             <input id="inputTextColumn" class="form-control" type="text" minlength="4" maxlength="30"
                                    value="note_text"/>
                         </div>
+                        <div class="form-group">
+                            <i class="fas fa-folder"></i>
+                            <label for="inputAdHocClause" class="mr-2 col-form-label-sm">Extra Where Clause</label>
+                            <textarea id="inputAdHocClause" maxlength="100" class="md-textarea form-control"
+                                      rows="3"></textarea>
+                        </div>
+
+                        <div id="inputSpinner" class="spinner-border text-info float-right" hidden role="status">
+                            <span class="sr-only">Checking connection...</span>
+                        </div>
+                        <div id="inputMessage" hidden>
+                        </div>
                         <div class="modal-footer">
                             <button class="btn btn-primary" type="button" onclick="createConnection()">Create
                                 Connection
@@ -239,12 +251,86 @@
 
 {% block counter_scripts %}
 
+    <script>
+        const inputConnectionName = document.getElementById('inputConnectionName');
+        const inputConnectionDescription = document.getElementById('inputConnectionDescription');
+        const inputProjectName = document.getElementById('inputProjectName');
+        const inputDirectoryPath = document.getElementById('inputDirectoryPath');
+        const inputDriver = document.getElementById('inputDriver');
+        const inputServer = document.getElementById('inputServer');
+        const inputDatabase = document.getElementById('inputDatabase');
+        const inputTablename = document.getElementById('inputTablename');
+        const inputNameColumn = document.getElementById('inputNameColumn');
+        const inputTextColumn = document.getElementById('inputTextColumn');
+        const inputAdHocClause = document.getElementById('inputAdHocClause');
+        const inputSpinner = document.getElementById('inputSpinner');
+        const inputMessage = document.getElementById('inputMessage');
+        inputSpinner.hidden = true;
+
+        function checkConnection() {
+            inputSpinner.hidden = false;
+            fetch('/tool/connection/check', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    'connection_name': inputConnectionName.value,
+                    'description': inputConnectionDescription.value,
+                    'project_name': inputProjectName.value,
+                    'path': inputDirectoryPath.value,
+                    'driver': inputDriver.value,
+                    'server': inputServer.value,
+                    'database': inputDatabase.value,
+                    'tablename': inputTablename.value,
+                    'name_column': inputNameColumn.value,
+                    'text_column': inputTextColumn.value,
+                    'ad_hoc_clause': inputAdHocClause.value,
+                })
+            }).then(function (response) {
+                return response.json();
+            }).then(function (data) {
+                inputSpinner.hidden = true;
+                if (data['status']) {
+                    inputMessage.innerText = `Success! ${data['message']}`;
+                } else {
+                    inputMessage.innerText = `Failed. ${data['message']}`;
+                }
+                inputMessage.hidden = false;
+            })
+
+        }
+
+        function createConnection() {
+            fetch('/tool/connection/create', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    'connection_name': inputConnectionName.value,
+                    'description': inputConnectionDescription.value,
+                    'project_name': inputProjectName.value,
+                    'directory_path': inputDirectoryPath.value,
+                    'driver': inputDriver.value,
+                    'server': inputServer.value,
+                    'database': inputDatabase.value,
+                    'tablename': inputTablename.value,
+                    'name_column': inputNameColumn.value,
+                    'text_column': inputTextColumn.value,
+                    'ad_hoc_clause': inputAdHocClause.value,
+                })
+            })
+        }
+    </script>
 
     <script>
 
-        var inputFeedbackName = document.getElementById('inputFeedbackName');
-        var inputFeedbackDescription = document.getElementById('inputFeedbackDescription');
-        var starRatingControl = new StarRating('.star-rating');
+        const inputFeedbackName = document.getElementById('inputFeedbackName');
+        const inputFeedbackDescription = document.getElementById('inputFeedbackDescription');
+        const starRatingControl = new StarRating('.star-rating');
 
         function buildStarRatingControl() {
             starRatingControl.rebuild();
