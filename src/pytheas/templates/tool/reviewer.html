@@ -388,7 +388,6 @@
     }
 
     function updateRegexFilter(regexFilterId) {
-        console.log('update regex');
         let regexFilterElement = document.getElementById(regexFilterId);
         let regexFilterElementInclude = document.getElementById(`${regexFilterId}_include`);
         let regexFilterElementExclude = document.getElementById(`${regexFilterId}_exclude`);
@@ -423,7 +422,6 @@
     }
 
     function deleteRegexFilter(regexFilterId) {
-        console.log('delete regex');
         fetch('/tool/review/{{ connection_name }}/{{ connection_url }}/filter/delete', {
             method: 'POST',
             headers: {
@@ -502,7 +500,6 @@
                     toastMini.innerText = 'Just now...';
                     toastMessage.innerText = 'Successfully saved comment';
                 }
-                console.log(toast);
                 toast.toast('show');
             });
     }

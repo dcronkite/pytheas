@@ -152,7 +152,6 @@ def review_connection_prev(connection_name, connection_id, name_url):
 def review_connection_next(connection_name, connection_id, name_url):
     doc = connection_service.get_next_record(user_service.get_current_username(), connection_id)
     regex_filters = regex_filter_service.get_regex_filters(connection_id)
-    print(regex_filters)
     return {
         'connection_name': connection_name,
         'connection_url': connection_id,
