@@ -33,10 +33,27 @@
         label {
             border-width: 5px !important;
         }
+
         label.active {
             border-color: darkorange !important;
             border-style: solid;
             border-width: 5px;
+        }
+
+        .dlk-radio input[type="radio"],
+        .dlk-radio input[type="checkbox"] {
+            margin-left: -99999px;
+            display: none;
+        }
+
+        .dlk-radio input[type="radio"] + .fa,
+        .dlk-radio input[type="checkbox"] + .fa {
+            opacity: 0.15
+        }
+
+        .dlk-radio input[type="radio"]:checked + .fa,
+        .dlk-radio input[type="checkbox"]:checked + .fa {
+            opacity: 1
         }
 
     </style>
@@ -74,15 +91,16 @@
 
 <div class="progress" style="height:30px">
     {% if progress %}
-    <div class="progress-bar" role="progressbar" style="width:{{ progress.done.percent }}%;height:30px">
-        {{ progress.done.count }} Done
-    </div>
-    <div class="progress-bar bg-info" role="progressbar" style="width:{{ progress.in_progress.percent }}%;height:30px">
-        {{ progress.in_progress.count }} In progress
-    </div>
-    <div class="progress-bar bg-danger" role="progressbar" style="width:{{ progress.ready.percent }}%;height:30px">
-        {{ progress.ready.count }} Ready
-    </div>
+        <div class="progress-bar" role="progressbar" style="width:{{ progress.done.percent }}%;height:30px">
+            {{ progress.done.count }} Done
+        </div>
+        <div class="progress-bar bg-info" role="progressbar"
+             style="width:{{ progress.in_progress.percent }}%;height:30px">
+            {{ progress.in_progress.count }} In progress
+        </div>
+        <div class="progress-bar bg-danger" role="progressbar" style="width:{{ progress.ready.percent }}%;height:30px">
+            {{ progress.ready.count }} Ready
+        </div>
     {% endif %}
 </div>
 
@@ -143,7 +161,7 @@
                     </a>
                     to apply changes
                 </p>
-        </div>
+            </div>
         </li>
         <li class="nav-item">
             <a class="nav-link"
@@ -233,20 +251,111 @@
                 </li>
             {% endfor %}
         </ul>
+
+        <h2>Regex Filters</h2>
+        <p>
+            Require these regular expressions to match/not match.
+            Click "Refresh" to update changes
+        </p>
+        <div class="table-responsive dlk-radio btn-group">
+            <table class="table">
+                <thead>
+                <tr>
+                    <td>Include</td>
+                    <td>Exclude</td>
+                    <td>Ignore</td>
+                    <td>
+                        <button class="btn-info">Refresh</button>
+                    </td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td colspan="4">
+                        <textarea class="form-control" rows="2">
+
+                        </textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label class="btn btn-success">
+                            <input name="choices[1]" class="form-control" type="radio" value="1">
+                            <i class="fa fa-check glyphicon glyphicon-ok"></i>
+                        </label>
+                    </td>
+                    <td>
+                        <label class="btn btn-danger">
+                            <input name="choices[1]" class="form-control" type="radio" value="2"
+                                   defaultchecked="checked">
+                            <i class="fa fa-times glyphicon glyphicon-remove"></i>
+                        </label>
+                    </td>
+                    <td>
+                        <label class="btn btn-warning">
+                            <input name="choices[1]" class="form-control" type="radio" value="2"
+                                   defaultchecked="checked">
+                            <i class="fa fa-circle glyphicon glyphicon-remove"></i>
+                        </label>
+                    </td>
+                    <td>
+                        <button class="btn-info">Add</button>
+                    </td>
+                </tr>
+                {% for regex_filter in regex_filters %}
+
+                    <tr>
+                        <td colspan="4">
+                        <textarea class="form-control" rows="2">
+
+                        </textarea>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label class="btn btn-success">
+                                <input name="choices[1]" class="form-control" type="radio" value="1"
+                                       {% if regex_filter.include %}checked{% endif %}
+                                >
+                                <i class="fa fa-check glyphicon glyphicon-ok"></i>
+                            </label>
+                        </td>
+                        <td>
+                            <label class="btn btn-danger">
+                                <input name="choices[1]" class="form-control" type="radio" value="2"
+                                       {% if regex_filter.exclude %}checked{% endif %}
+                                >
+                                <i class="fa fa-times glyphicon glyphicon-remove"></i>
+                            </label>
+                        </td>
+                        <td>
+                            <label class="btn btn-warning">
+                                <input name="choices[1]" class="form-control" type="radio" value="2"
+                                       {% if regex_filter.ignore %}checked{% endif %}
+                                >
+                                <i class="fa fa-circle glyphicon glyphicon-remove"></i>
+                            </label>
+                        </td>
+                        <td>
+                            <button class="btn-danger">Delete</button>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
 <script>
     function markDone() {
         fetch('/tool/review/{{ connection_name }}/{{ connection_url }}/mark/done/{{ document.name_url }}', {
-           method: 'POST',
+            method: 'POST',
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-
-            })
+            body: JSON.stringify({})
         });
     }
 </script>
@@ -304,6 +413,7 @@
         });
         return results;
     }
+
     console.log(getResponses());
 
     function saveResponseFromLabel(labelField) {
@@ -311,7 +421,7 @@
         console.log(labelField)
         let inputField = document.getElementById(labelField.htmlFor);
         // checkbox not clicked
-        inputField.checked = ! (inputField.checked);
+        inputField.checked = !(inputField.checked);
         console.log(inputField.checked);
         saveResponses(inputField);
     }
