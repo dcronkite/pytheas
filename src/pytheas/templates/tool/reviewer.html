@@ -79,14 +79,22 @@
 <body>
 
 <div class="row">
-    {% for label, value in document.metadata.items() %}
-        <div class="card col-sm-3">
-            <label>
-                {{ label }}
-                <input readonly="readonly" value="{{ value }}"/>
-            </label>
-        </div>
-    {% endfor %}
+    {% if document is none %}
+        <h2>Review Completed</h2>
+        <a href="/tool/review/{{ connection_name }}/{{ connection_url }}/reset"
+           class="btn btn-warning">
+            Reset Review Status
+        </a>
+    {% else %}
+        {% for label, value in document.metadata.items() %}
+            <div class="card col-sm-3">
+                <label>
+                    {{ label }}
+                    <input readonly="readonly" value="{{ value }}"/>
+                </label>
+            </div>
+        {% endfor %}
+    {% endif %}
 </div>
 
 <div class="progress" style="height:30px">
@@ -265,7 +273,8 @@
                     <td>Exclude</td>
                     <td>Ignore</td>
                     <td>
-                        <a href="/tool/review/{{ connection_name }}/{{ connection_url }}" class="btn btn-info">Refresh Regexes</a>
+                        <a href="/tool/review/{{ connection_name }}/{{ connection_url }}" class="btn btn-info">Refresh
+                            Regexes</a>
                     </td>
                 </tr>
                 </thead>
@@ -278,7 +287,8 @@
                 <tr>
                     <td>
                         <label class="btn btn-success">
-                            <input id="new_rf_include" name="choices[0]" class="form-control" type="radio" value="1" checked>
+                            <input id="new_rf_include" name="choices[0]" class="form-control" type="radio" value="1"
+                                   checked>
                             <i class="fa fa-check glyphicon glyphicon-ok"></i>
                         </label>
                     </td>

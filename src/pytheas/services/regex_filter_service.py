@@ -1,3 +1,5 @@
+import re
+
 from pytheas.data.connections import Connection
 from pytheas.data.regex_filters import Filter
 from pytheas.services import user_service
@@ -53,3 +55,22 @@ def update_regex_filter(connection_id, regex_id, regex, include, exclude, ignore
     rx_filter.ignore_flag = ignore
     rx_filter.save()
     return []
+
+
+def _build_regex(connection_id, username, *, include_flag=False, exclude_flag=False):
+    pattern = '|'.join([rx_filter.regex for rx_filter in Filter.objects(
+        username=username,
+        connection_id=connection_id,
+        active=True,
+        include_flag=include_flag,
+        exclude_flag=exclude_flag,
+    )])
+    return re.compile(f'({pattern})', re.I) if pattern else None
+
+
+def build_inclusion_regex(connection_id, username):
+    return _build_regex(connection_id, username, include_flag=True)
+
+
+def build_exclusion_regex(connection_id, username):
+    return _build_regex(connection_id, username, exclude_flag=True)

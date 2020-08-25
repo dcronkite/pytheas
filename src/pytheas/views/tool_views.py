@@ -134,7 +134,6 @@ def review_connection_remove_regex(connection_name, connection_id):
 def review_connection_prev(connection_name, connection_id, name_url):
     doc = connection_service.get_previous_record(user_service.get_current_username(), connection_id)
     regex_filters = regex_filter_service.get_regex_filters(connection_id)
-    print(regex_filters)
     return {
         'connection_name': connection_name,
         'connection_url': connection_id,
@@ -150,6 +149,24 @@ def review_connection_prev(connection_name, connection_id, name_url):
 @login_required
 @response(template_file='tool/reviewer.html')
 def review_connection_next(connection_name, connection_id, name_url):
+    doc = connection_service.get_next_record(user_service.get_current_username(), connection_id)
+    regex_filters = regex_filter_service.get_regex_filters(connection_id)
+    return {
+        'connection_name': connection_name,
+        'connection_url': connection_id,
+        'regex_filters': regex_filters,
+        'previous': None,
+        'progress': {},
+        'document': doc,
+        'history': [],
+    }
+
+
+@blueprint.route('/tool/review/<string:connection_name>/<string:connection_id>/reset')
+@login_required
+@response(template_file='tool/reviewer.html')
+def review_connection_reset(connection_name, connection_id):
+    connection_service.reset_records(user_service.get_current_username(), connection_id)
     doc = connection_service.get_next_record(user_service.get_current_username(), connection_id)
     regex_filters = regex_filter_service.get_regex_filters(connection_id)
     return {

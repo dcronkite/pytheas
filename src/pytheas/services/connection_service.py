@@ -5,7 +5,7 @@ import urllib.parse
 from pytheas.data.annotation_state import AnnotationState
 from pytheas.data.connections import Connection
 from pytheas.data.text_by_connections import TextByConnection
-from pytheas.services import annotation_service
+from pytheas.services import annotation_service, regex_filter_service
 
 
 def get_connections(username):
@@ -123,7 +123,7 @@ def get_previous_record(username, connection_id, inclusion_regex=None, exclusion
     )
 
 
-def get_next_record(username, connection_id, inclusion_regex=None, exclusion_regex=None):
+def get_next_record(username, connection_id):
     return get_record(
         {
             'username': username,
@@ -133,9 +133,18 @@ def get_next_record(username, connection_id, inclusion_regex=None, exclusion_reg
         'order',
         connection_id,
         username,
-        inclusion_regex=inclusion_regex,
-        exclusion_regex=exclusion_regex,
+        inclusion_regex=regex_filter_service.build_inclusion_regex(connection_id, username),
+        exclusion_regex=regex_filter_service.build_exclusion_regex(connection_id, username),
     )
+
+
+def reset_records(username, connection_id):
+    conn = _get_connection(connection_id)
+    TextByConnection.objects(
+            connection_id=connection_id,
+            username=username,
+            project_name=conn.project_name
+    ).update(set__annotation_state=AnnotationState.READY)
 
 
 def mark_done(connection_id, text_name):
