@@ -3,7 +3,7 @@ import urllib.parse
 import flask
 from flask_login import login_required
 
-from pytheas.services import service, tool_service, user_service, connection_service
+from pytheas.services import service, tool_service, user_service, connection_service, regex_filter_service
 from pytheas.utils.view_modifiers import response
 
 blueprint = flask.Blueprint('tool', __name__, template_folder='../templates')
@@ -70,9 +70,12 @@ def explore():
 @response(template_file='tool/reviewer.html')
 def review_connection(connection_name, connection_id):
     doc = connection_service.get_next_record(user_service.get_current_username(), connection_id)
+    regex_filters = regex_filter_service.get_regex_filters(connection_id)
+    print(regex_filters)
     return {
         'connection_name': connection_name,
         'connection_url': connection_id,
+        'regex_filters': regex_filters,
         'previous': None,
         'progress': {},
         'document': doc,
@@ -130,9 +133,12 @@ def review_connection_remove_regex(connection_name, connection_id):
 @response(template_file='tool/reviewer.html')
 def review_connection_prev(connection_name, connection_id, name_url):
     doc = connection_service.get_previous_record(user_service.get_current_username(), connection_id)
+    regex_filters = regex_filter_service.get_regex_filters(connection_id)
+    print(regex_filters)
     return {
         'connection_name': connection_name,
         'connection_url': connection_id,
+        'regex_filters': regex_filters,
         'previous': None,
         'progress': {},
         'document': doc,
@@ -145,9 +151,12 @@ def review_connection_prev(connection_name, connection_id, name_url):
 @response(template_file='tool/reviewer.html')
 def review_connection_next(connection_name, connection_id, name_url):
     doc = connection_service.get_next_record(user_service.get_current_username(), connection_id)
+    regex_filters = regex_filter_service.get_regex_filters(connection_id)
+    print(regex_filters)
     return {
         'connection_name': connection_name,
         'connection_url': connection_id,
+        'regex_filters': regex_filters,
         'previous': None,
         'progress': {},
         'document': doc,
@@ -160,6 +169,38 @@ def review_connection_next(connection_name, connection_id, name_url):
 def review_connection_add_response(connection_name, connection_id):
     data = flask.request.get_json()
     errors = connection_service.add_response(user_service.get_current_username(), connection_id, data['response'])
+    return {
+        'errors': errors
+    }
+
+
+@blueprint.route('/tool/review/<string:connection_name>/<string:connection_id>/filter/add', methods=['POST'])
+@login_required
+def add_regex_filter(connection_name, connection_id):
+    data = flask.request.get_json()
+    errors = regex_filter_service.add_regex_filter(connection_id, data['regex'], data['include'], data['exclude'],
+                                                   data['ignore'])
+    return {
+        'errors': errors
+    }
+
+
+@blueprint.route('/tool/review/<string:connection_name>/<string:connection_id>/filter/delete', methods=['POST'])
+@login_required
+def delete_regex_filter(connection_name, connection_id):
+    data = flask.request.get_json()
+    errors = regex_filter_service.delete_regex_filter(connection_id, data['id'])
+    return {
+        'errors': errors
+    }
+
+
+@blueprint.route('/tool/review/<string:connection_name>/<string:connection_id>/filter/update', methods=['POST'])
+@login_required
+def update_regex_filter(connection_name, connection_id):
+    data = flask.request.get_json()
+    errors = regex_filter_service.update_regex_filter(connection_id, data['id'], data['regex'], data['include'],
+                                                      data['exclude'], data['ignore'])
     return {
         'errors': errors
     }

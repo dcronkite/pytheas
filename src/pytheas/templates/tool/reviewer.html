@@ -265,56 +265,57 @@
                     <td>Exclude</td>
                     <td>Ignore</td>
                     <td>
-                        <button class="btn-info">Refresh</button>
+                        <a href="/tool/review/{{ connection_name }}/{{ connection_url }}" class="btn btn-info">Refresh Regexes</a>
                     </td>
                 </tr>
                 </thead>
                 <tbody>
                 <tr>
                     <td colspan="4">
-                        <textarea class="form-control" rows="2">
-
-                        </textarea>
+                        <textarea id="new_rf_regex" class="form-control" rows="2"></textarea>
                     </td>
                 </tr>
                 <tr>
                     <td>
                         <label class="btn btn-success">
-                            <input name="choices[1]" class="form-control" type="radio" value="1">
+                            <input id="new_rf_include" name="choices[0]" class="form-control" type="radio" value="1" checked>
                             <i class="fa fa-check glyphicon glyphicon-ok"></i>
                         </label>
                     </td>
                     <td>
                         <label class="btn btn-danger">
-                            <input name="choices[1]" class="form-control" type="radio" value="2"
-                                   defaultchecked="checked">
+                            <input id="new_rf_exclude" name="choices[0]" class="form-control" type="radio" value="2">
                             <i class="fa fa-times glyphicon glyphicon-remove"></i>
                         </label>
                     </td>
                     <td>
                         <label class="btn btn-warning">
-                            <input name="choices[1]" class="form-control" type="radio" value="2"
-                                   defaultchecked="checked">
+                            <input id="new_rf_ignore" name="choices[0]" class="form-control" type="radio" value="2">
                             <i class="fa fa-circle glyphicon glyphicon-remove"></i>
                         </label>
                     </td>
                     <td>
-                        <button class="btn-info">Add</button>
+                        <button class="btn-info" onclick="addRegexFilter()">Add</button>
                     </td>
                 </tr>
                 {% for regex_filter in regex_filters %}
 
                     <tr>
-                        <td colspan="4">
-                        <textarea class="form-control" rows="2">
-
-                        </textarea>
+                        <td colspan="3">
+                        <textarea id="{{ regex_filter.id }}" class="form-control" rows="2"
+                        >{{ regex_filter.regex }}</textarea>
+                        </td>
+                        <td>
+                            <button class="btn btn-success" onclick="updateRegexFilter('{{ regex_filter.id }}')">
+                                Refresh
+                            </button>
                         </td>
                     </tr>
                     <tr>
                         <td>
                             <label class="btn btn-success">
-                                <input name="choices[1]" class="form-control" type="radio" value="1"
+                                <input id="{{ regex_filter.id }}_include" name="choices[{{ loop.index + 1 }}]"
+                                       class="form-control" type="radio" value="1"
                                        {% if regex_filter.include %}checked{% endif %}
                                 >
                                 <i class="fa fa-check glyphicon glyphicon-ok"></i>
@@ -322,7 +323,8 @@
                         </td>
                         <td>
                             <label class="btn btn-danger">
-                                <input name="choices[1]" class="form-control" type="radio" value="2"
+                                <input id="{{ regex_filter.id }}_exclude" name="choices[{{ loop.index + 1 }}]"
+                                       class="form-control" type="radio" value="2"
                                        {% if regex_filter.exclude %}checked{% endif %}
                                 >
                                 <i class="fa fa-times glyphicon glyphicon-remove"></i>
@@ -330,14 +332,17 @@
                         </td>
                         <td>
                             <label class="btn btn-warning">
-                                <input name="choices[1]" class="form-control" type="radio" value="2"
+                                <input id="{{ regex_filter.id }}_ignore" name="choices[{{ loop.index + 1 }}]"
+                                       class="form-control" type="radio" value="2"
                                        {% if regex_filter.ignore %}checked{% endif %}
                                 >
                                 <i class="fa fa-circle glyphicon glyphicon-remove"></i>
                             </label>
                         </td>
                         <td>
-                            <button class="btn-danger">Delete</button>
+                            <button class="btn-danger" onclick="deleteRegexFilter('{{ regex_filter.id }}')">
+                                Delete
+                            </button>
                         </td>
                     </tr>
                 {% endfor %}
@@ -346,6 +351,104 @@
         </div>
     </div>
 </div>
+
+<script>
+    const newRegexFilterRegex = document.getElementById('new_rf_regex');
+    const newRegexFilterInclude = document.getElementById('new_rf_include');
+    const newRegexFilterExclude = document.getElementById('new_rf_exclude');
+    const newRegexFilterIgnore = document.getElementById('new_rf_ignore');
+
+    function addRegexFilter() {
+        fetch('/tool/review/{{ connection_name }}/{{ connection_url }}/filter/add', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                'regex': newRegexFilterRegex.value,
+                'include': newRegexFilterInclude.checked,
+                'exclude': newRegexFilterExclude.checked,
+                'ignore': newRegexFilterIgnore.checked,
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data['errors'].length > 0) {
+                    toastHeader.innerText = data['errors'][0]['header'];
+                    toastMessage.innerText = data['errors'][0]['message'];
+                    toastMini.innerText = `${data['errors'].length} errors`
+                } else {
+                    toastHeader.innerText = 'Added Regex';
+                    toastMini.innerText = 'Just now...';
+                    toastMessage.innerText = 'Please refresh to reload regex filters';
+                }
+                toast.toast('show');
+            });
+    }
+
+    function updateRegexFilter(regexFilterId) {
+        console.log('update regex');
+        let regexFilterElement = document.getElementById(regexFilterId);
+        let regexFilterElementInclude = document.getElementById(`${regexFilterId}_include`);
+        let regexFilterElementExclude = document.getElementById(`${regexFilterId}_exclude`);
+        let regexFilterElementIgnore = document.getElementById(`${regexFilterId}_ignore`);
+        fetch('/tool/review/{{ connection_name }}/{{ connection_url }}/filter/update', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                'id': regexFilterId,
+                'regex': regexFilterElement.value,
+                'include': regexFilterElementInclude.checked,
+                'exclude': regexFilterElementExclude.checked,
+                'ignore': regexFilterElementIgnore.checked,
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data['errors'].length > 0) {
+                    toastHeader.innerText = data['errors'][0]['header'];
+                    toastMessage.innerText = data['errors'][0]['message'];
+                    toastMini.innerText = `${data['errors'].length} errors`
+                } else {
+                    toastHeader.innerText = 'Added Regex';
+                    toastMini.innerText = 'Just now...';
+                    toastMessage.innerText = 'Please refresh to reload regex filters';
+                }
+                toast.toast('show');
+            });
+    }
+
+    function deleteRegexFilter(regexFilterId) {
+        console.log('delete regex');
+        fetch('/tool/review/{{ connection_name }}/{{ connection_url }}/filter/delete', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                'id': regexFilterId,
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data['errors'].length > 0) {
+                    toastHeader.innerText = data['errors'][0]['header'];
+                    toastMessage.innerText = data['errors'][0]['message'];
+                    toastMini.innerText = `${data['errors'].length} errors`
+                } else {
+                    toastHeader.innerText = 'Added Regex';
+                    toastMini.innerText = 'Just now...';
+                    toastMessage.innerText = 'Please refresh to reload regex filters';
+                }
+                toast.toast('show');
+            });
+    }
+</script>
 
 <script>
     function markDone() {
