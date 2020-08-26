@@ -69,7 +69,11 @@ class Connection:
         return {x: y for x, y in zip(self.metadata, metadata)}
 
     def iterate(self, include_regex=None, exclude_regex=None):
+        print(include_regex)
+        print(exclude_regex)
         for name, text, metadata in self._get_next():
+            if not text or not text.strip():
+                continue
             if exclude_regex and exclude_regex.search(text):
                 continue
             elif self.exclude_rx and self.exclude_rx.search(text):
@@ -107,7 +111,9 @@ class Connection:
 
     @property
     def ad_hoc_safe(self):
-        ad_hoc = ';'.split(self.ad_hoc_clause)[0].strip()
+        ad_hoc = self.ad_hoc_clause.split(';')[0].strip()
+        if not ad_hoc:
+            return ''
         ad_hoc_lower = ad_hoc.lower()
         if (not ad_hoc_lower.startswith('where') or 'drop' in ad_hoc_lower
                 or 'delete' in ad_hoc_lower or ad_hoc_lower.startswith('update')

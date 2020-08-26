@@ -26,6 +26,7 @@ class Connection(mongoengine.Document):
     include_regex = mongoengine.StringField()
     exclude_regex = mongoengine.StringField()
     highlights = mongoengine.ListField(mongoengine.StringField())
+    populated = mongoengine.DateTimeField(default=None)
 
     meta = {
         'collection': 'connections',
@@ -36,6 +37,14 @@ class Connection(mongoengine.Document):
             'username',
         ]
     }
+
+    def set_populated(self):
+        self.populated = datetime.datetime.now()
+        self.save()
+
+    @property
+    def is_populated(self):
+        return self.populated is not None
 
     @property
     def name(self):

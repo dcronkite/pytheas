@@ -71,7 +71,6 @@ def explore():
 def review_connection(connection_name, connection_id):
     doc = connection_service.get_next_record(user_service.get_current_username(), connection_id)
     regex_filters = regex_filter_service.get_regex_filters(connection_id)
-    print(regex_filters)
     return {
         'connection_name': connection_name,
         'connection_url': connection_id,
@@ -89,7 +88,8 @@ def review_connection(connection_name, connection_id):
 def review_connection_update(connection_name, connection_id, name_url):
     data = flask.request.get_json()
     errors = []
-    connection_service.update_tbc(connection_id, urllib.parse.unquote_plus(name_url), **data)
+    connection_service.update_tbc(connection_id, urllib.parse.unquote_plus(name_url),
+                                  user_service.get_current_username(), **data)
     return {
         'errors': errors,
     }
@@ -100,7 +100,8 @@ def review_connection_update(connection_name, connection_id, name_url):
 @login_required
 def review_connection_mark_done(connection_name, connection_id, name_url):
     errors = []
-    connection_service.mark_done(connection_id, urllib.parse.unquote_plus(name_url))
+    connection_service.mark_done(connection_id, urllib.parse.unquote_plus(name_url),
+                                 user_service.get_current_username())
     return {
         'errors': errors,
     }

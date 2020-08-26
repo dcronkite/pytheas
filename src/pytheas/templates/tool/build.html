@@ -358,6 +358,9 @@
                     'name_column': inputNameColumn.value,
                     'text_column': inputTextColumn.value,
                     'ad_hoc_clause': inputAdHocClause.value,
+                    'metadata': inputOtherColumns.value,
+                    'include_regex': inputInclusionRegex.value,
+                    'exclude_regex': inputExclusionRegex.value,
                 })
             }).then(function (response) {
                 return response.json();

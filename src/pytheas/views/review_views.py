@@ -73,7 +73,7 @@ def reviewer_next(project_url_name, annotation_id):
     project_name = urllib.parse.unquote_plus(project_url_name)
     username = user_service.get_current_username()
     annotation_service.mark_annotation_completed(project_name, username, annotation_id)
-    annot = annotation_service.get_next_annotation(project_name, user_service.get_current_username())
+    annot = annotation_service.get_next_annotation(project_name, username)
     return _make_reviewer_response(annot, project_name)
 
 

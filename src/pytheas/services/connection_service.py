@@ -22,14 +22,20 @@ def get_connections(username):
     } for c in Connection.objects(username=username, expiration_date__gt=datetime.datetime.now())]
 
 
+def _clean_conargs(**conargs):
+    """Clean connection arguments"""
+    conargs['metadata'] = [x.strip() for x in conargs['metadata'].split(',') if x.strip()]
+    return conargs
+
+
 def check_connection(username, **conargs):
-    c = Connection(username=username, **conargs)
+    c = Connection(username=username, **_clean_conargs(**conargs))
     success, message = c.connect.test_query()
     return success, message
 
 
 def create_connection(username, **conargs):
-    c = Connection(username=username, **conargs)
+    c = Connection(username=username, **_clean_conargs(**conargs))
     c.save()
     return True, 'Successful, refresh to see connection'
 
@@ -44,7 +50,7 @@ def populate_connection(connection: Connection, username, *,
         tbc = TextByConnection(
             connection_id=connection.id,
             username=username,
-            text_name=name,
+            text_name=str(name),
             text_content=text,
             project_name=connection.project_name,
             annotation_state=AnnotationState.READY,
@@ -52,6 +58,7 @@ def populate_connection(connection: Connection, username, *,
             metadata=metadata,
         )
         tbc.save()
+    connection.set_populated()
 
 
 def _get_connection(connection_id):
@@ -100,7 +107,7 @@ def get_record(tbc_dict, order_by, connection_id, username, *, inclusion_regex=N
     i, tbc = _get_record(tbc_dict, order_by, c, inclusion_regex=inclusion_regex, exclusion_regex=exclusion_regex)
     if tbc:
         return tbc
-    if i is None:  # nothing loaded
+    if i is None and not c.is_populated:  # nothing loaded
         populate_connection(c, username, include_regex=inclusion_regex, exclude_regex=exclusion_regex)
         i, tbc = _get_record(tbc_dict, order_by, c, inclusion_regex=inclusion_regex, exclusion_regex=exclusion_regex)
         if tbc:
@@ -108,7 +115,7 @@ def get_record(tbc_dict, order_by, connection_id, username, *, inclusion_regex=N
     return None  # TODO: handle completed review
 
 
-def get_previous_record(username, connection_id, inclusion_regex=None, exclusion_regex=None):
+def get_previous_record(username, connection_id):
     return get_record(
         {
             'username': username,
@@ -118,8 +125,8 @@ def get_previous_record(username, connection_id, inclusion_regex=None, exclusion
         '-order',
         connection_id,
         username,
-        inclusion_regex=inclusion_regex,
-        exclusion_regex=exclusion_regex,
+        inclusion_regex=regex_filter_service.build_inclusion_regex(connection_id, username),
+        exclusion_regex=regex_filter_service.build_exclusion_regex(connection_id, username),
     )
 
 
@@ -147,17 +154,17 @@ def reset_records(username, connection_id):
     ).update(set__annotation_state=AnnotationState.READY)
 
 
-def mark_done(connection_id, text_name):
-    tbc = TextByConnection.objects(connection_id=connection_id, text_name=text_name).first()
-    tbc.annotation_state = AnnotationState.DONE
-    tbc.save()
+def mark_done(connection_id, text_name, username):
+    TextByConnection.objects(
+        connection_id=connection_id, text_name=text_name, username=username
+    ).update(set__annotation_state=AnnotationState.DONE)
 
 
-def update_tbc(connection_id, text_name, **fields):
-    tbc = TextByConnection.objects(connection_id=connection_id, text_name=text_name).first()
-    for key, value in fields.items():
-        tbc[key] = value
-    tbc.save()
+def update_tbc(connection_id, text_name, username, **fields):
+    for tbc in TextByConnection.objects(connection_id=connection_id, text_name=text_name, username=username):
+        for key, value in fields.items():
+            tbc[key] = value
+        tbc.save()
 
 
 def add_response(username, connection_id, response):
