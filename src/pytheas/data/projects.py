@@ -10,6 +10,7 @@ class Project(mongoengine.Document):
     start_date = mongoengine.DateTimeField()
     end_date = mongoengine.DateTimeField()
     usernames = mongoengine.ListField(mongoengine.StringField())
+    subprojects = mongoengine.ListField(mongoengine.StringField())
 
     meta = {
         'collection': 'projects',

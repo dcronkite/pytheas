@@ -11,28 +11,37 @@ from pytheas.services import highlight_service
 from pytheas.services.history_service import write_history
 
 
-def get_annotation_responses(project_name, username):
+def get_annotation_responses(project_name, username, **kwargs):
+    kwargs = {x: y for x, y in kwargs.items() if y}
     counter = Counter()
-    for annot in Annotation.objects(project=project_name, username=username):
+    for annot in Annotation.objects(project=project_name, username=username, **kwargs):
         for response in annot.responses:
             counter[response] += 1
     return [{'response': response, 'count': count} for response, count in counter.items()]
 
 
-def _get_next_abu(project_name, username, state):
-    annot = AnnotationByUser.objects(
-        project_name=project_name,
-        username=username,
-        annotation_state=state,
-    ).order_by('order').first()
+def _get_next_abu(project_name, username, state, subproject_name=None):
+    if subproject_name:
+        annot = AnnotationByUser.objects(
+            project_name=project_name,
+            username=username,
+            annotation_state=state,
+            subproject_name=subproject_name,
+        ).order_by('order').first()
+    else:
+        annot = AnnotationByUser.objects(
+            project_name=project_name,
+            username=username,
+            annotation_state=state,
+        ).order_by('order').first()
     if annot:
         return annot
 
 
-def get_next_abu(project_name, username):
-    if state := _get_next_abu(project_name, username, AnnotationState.IN_PROGRESS):
+def get_next_abu(project_name, username, subproject_name):
+    if state := _get_next_abu(project_name, username, AnnotationState.IN_PROGRESS, subproject_name):
         return state
-    elif state := _get_next_abu(project_name, username, AnnotationState.READY):
+    elif state := _get_next_abu(project_name, username, AnnotationState.READY, subproject_name):
         return state
     return None
 
@@ -72,23 +81,32 @@ def _get_abu_response(annot: Annotation, doc: Document, highlights):
     }
 
 
-def get_annotation_by_id(project_name, annotation_id, username, highlights=None):
-    abu = AnnotationByUser.objects(project_name=project_name,
-                                   username=username,
-                                   annotation_id=annotation_id
-                                   ).first()
+def get_annotation_by_id(project_name, annotation_id, username, subproject_name, *, highlights=None):
+    if subproject_name:
+        abu = AnnotationByUser.objects(project_name=project_name,
+                                       username=username,
+                                       annotation_id=annotation_id,
+                                       subproject_name=subproject_name
+                                       ).first()
+    else:
+        abu = AnnotationByUser.objects(project_name=project_name,
+                                       username=username,
+                                       annotation_id=annotation_id
+                                       ).first()
     annot, doc = _get_or_create_annotation(abu)
-    write_history(annotation_id, project_name, username, doc.document_name, how=HistoryHow.BY_ANNOT_ID)
+    write_history(annotation_id, project_name, username, doc.document_name, how=HistoryHow.BY_ANNOT_ID,
+                  subproject_name=subproject_name)
     if highlights is None:
         highlights = highlight_service.get_highlights(username, project_name)
     return _get_abu_response(annot, doc, highlights)
 
 
-def get_next_annotation(project_name, username, highlights=None):
-    if not (abu := get_next_abu(project_name, username)):
+def get_next_annotation(project_name, username, subproject_name, *, highlights=None):
+    if not (abu := get_next_abu(project_name, username, subproject_name)):
         return None
     annot, doc = _get_or_create_annotation(abu, set_state=AnnotationState.IN_PROGRESS)
-    write_history(annot.id, project_name, username, doc.document_name, how=HistoryHow.NEXT)
+    write_history(annot.id, project_name, username, doc.document_name, how=HistoryHow.NEXT,
+                  subproject_name=subproject_name)
     if highlights is None:
         highlights = highlight_service.get_highlights(username, project_name)
     return _get_abu_response(annot, doc, highlights)

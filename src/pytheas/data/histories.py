@@ -6,6 +6,7 @@ import mongoengine as mongoengine
 class History(mongoengine.Document):
     username = mongoengine.StringField()
     project_name = mongoengine.StringField()
+    subproject_name = mongoengine.StringField()
     annotation_id = mongoengine.ObjectIdField()
     document_name = mongoengine.StringField()
     update_date = mongoengine.DateTimeField(default=datetime.datetime.now)
@@ -18,6 +19,7 @@ class History(mongoengine.Document):
         'indexes': [
             'username',
             'project_name',
+            'subproject_name',
             'first_entry',
             '-update_date',
         ]

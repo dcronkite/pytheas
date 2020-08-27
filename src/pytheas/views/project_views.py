@@ -17,6 +17,7 @@ def project_home(project_url_name):
     return {
         'user': user_service.get_current_user(),
         'project_details': project_service.get_project_details(project_name),
+        'subprojects': project_service.get_subprojects(project_name),
         'review_details': abu_service.get_abu_details(
             project_name,
             user_service.get_current_username(),

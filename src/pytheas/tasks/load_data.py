@@ -89,6 +89,8 @@ def _load_json_to_database(filepath, upload: Upload):
         raise ValueError(f'Project does not exist: {data["project"]}, {e}')
 
     subproject_name = data.get('subproject', f'{project.name}_{uuid.uuid4()}')
+    project.subprojects.append(subproject_name)
+    project.save()
     labels = data.get('labels', None)
     highlights = data.get('highlights', list())
     documents = data.get('documents', [])

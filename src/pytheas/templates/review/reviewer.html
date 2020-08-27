@@ -96,7 +96,11 @@
         <li class="nav-item">
             {% if previous %}
                 <a class="nav-link"
+                   {% if subproject %}
+                   href="/project/s/review/{{ project.name_url }}/{{ subproject.name_url }}/{{ previous }}"
+                   {% else %}
                    href="/project/review/{{ project.name_url }}/{{ previous }}"
+                   {% endif %}
                    onclick="saveAll()"
                 >Previous</a>
             {% else %}
@@ -128,7 +132,11 @@
         </li>
         <li class="nav-item">
             <a class="nav-link"
+               {% if subproject %}
+               href="/project/s/review/{{ project.name_url }}/{{ subproject.name_url }}/{{ document.annotation_id }}/next"
+               {% else %}
                href="/project/review/{{ project.name_url }}/{{ document.annotation_id }}/next"
+               {% endif %}
                onclick="saveAll()"
             >Next</a>
         </li>
@@ -145,7 +153,11 @@
         <ul>
             {% for item in history %}
                 <li>
+                {% if subproject %}
+                    <a href="/project/s/review/{{ project.name_url }}/{{ subproject.name_url }}/{{ item.annotation_id }}">{{ item.document_name }}</a> {{ item.update_date }}
+                {% else %}
                     <a href="/project/review/{{ project.name_url }}/{{ item.annotation_id }}">{{ item.document_name }}</a> {{ item.update_date }}
+                {% endif %}
                 </li>
             {% endfor %}
         </ul>
@@ -199,7 +211,11 @@
         <div id="refresh-button" hidden="hidden">
             <p>
                 <a
+                        {% if subproject %}
+                        href="/project/s/review/{{ project.name_url }}/{{ subproject.name_url }}/{{ document.annotation_id }}"
+                        {% else %}
                         href="/project/review/{{ project.name_url }}/{{ document.annotation_id }}"
+                        {% endif %}
                         onclick="saveAll()"
                 >
                     REFRESH

@@ -24,3 +24,12 @@ def get_project_details(project_name):
         'end_date': project.end_date,
         'name_url': urllib.parse.quote_plus(project.project_name),
     }
+
+
+def get_subprojects(project_name):
+    project = get_project_by_name(project_name)
+    return [
+        {'name': subproject,
+         'name_url': urllib.parse.quote_plus(subproject)
+         } for subproject in project.subprojects
+    ]
