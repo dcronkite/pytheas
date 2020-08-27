@@ -4,9 +4,17 @@ import flask
 from flask_login import login_required
 
 from pytheas.services import service, tool_service, user_service, connection_service, regex_filter_service
+from pytheas.tasks.load_data import load_data
 from pytheas.utils.view_modifiers import response
 
 blueprint = flask.Blueprint('tool', __name__, template_folder='../templates')
+
+
+@blueprint.route('/tool/load', methods=['POST'])
+@login_required
+def manual_load_data():
+    load_data()
+    return {}
 
 
 @blueprint.route('/tool/sandbox', methods=['GET'])

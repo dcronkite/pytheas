@@ -100,6 +100,14 @@
         {% endfor %}
 
 
+        <li class="nav-item">
+            <a class="nav-link" onclick="loadData()">
+                <i class="fas fa-fw fa-box"></i>
+                <span>Load Data</span>
+            </a>
+        </li>
+
+
         <!-- Divider -->
         <hr class="sidebar-divider d-none d-md-block">
 
@@ -404,6 +412,22 @@
 
 <!-- 5 star rating -->
 {#<script src="/static/js/star-rating.js"></script>#}
+
+<script>
+    function loadData() {
+        fetch('/tool/load', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                })
+            })
+            .then(function (response) {
+            })
+    }
+</script>
 
 <script>
     function copyContent(id) {
