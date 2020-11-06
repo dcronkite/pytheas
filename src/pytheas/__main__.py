@@ -99,7 +99,8 @@ def create_scheduled_jobs():
 
     app.config['DATA_DIR'] = mkdir_p(os.path.join(app.config['BASE_DIR'], 'data'))
     scheduler = BackgroundScheduler()
-    scheduler.add_job(load_data, 'cron', hour='23', minute='30', timezone='America/Los_Angeles')
+    scheduler.add_job(load_data, 'cron', hour='23', minute='30', timezone='America/Los_Angeles',
+                      misfire_grace_time=120)
     scheduler.start()
 
 

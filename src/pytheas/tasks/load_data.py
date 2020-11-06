@@ -87,6 +87,8 @@ def _load_json_to_database(filepath, upload: Upload):
         project = Project.objects(project_name=data['project']).first()
     except Exception as e:
         raise ValueError(f'Project does not exist: {data["project"]}, {e}')
+    if not project:
+        raise ValueError(f'Project does not exist: {data["project"]}. Please create project first.')
 
     subproject_name = data.get('subproject', f'{project.name}_{uuid.uuid4()}')
     project.subprojects.append(subproject_name)
