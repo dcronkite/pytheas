@@ -1,6 +1,7 @@
 import datetime
 import json
 import os
+import re
 import uuid
 
 import jsonschema
@@ -32,8 +33,16 @@ def resolve_expiration_date(*dates):
     return datetime.datetime.now() + datetime.timedelta(days=91)
 
 
+def clean_text(text):
+    res = []
+    for s in re.compile('([A-Z][A-Za-z/]+:)').split(text):
+        s = s.strip()
+        res.append(s)
+    return '\n'.join(res)
+
+
 def add_documents_to_user(upload: Upload, project_name: str, subproject_name: str, username: str, document_list,
-                          connections, labels=None, order=0, end_date=None, highlights=None):
+                          connections, labels=None, order=0, end_date=None, highlights=None, preprocessed=False):
     if not highlights:
         highlights = list()
     for document in document_list:
@@ -46,6 +55,9 @@ def add_documents_to_user(upload: Upload, project_name: str, subproject_name: st
                     break
             else:
                 raise ValueError(f'Unable to locate document {name}')
+        if not preprocessed:
+            text = clean_text(str(text))
+
         doc = Document(
             document_name=name,
             metadata=document.get('metadata', dict()),
