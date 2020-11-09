@@ -3,7 +3,7 @@ import flask
 from pytheas.services import admin_service
 from pytheas.utils.view_modifiers import response
 from pytheas.viewmodels.admin_viewmodel import AdminTasksViewModel, RegisterUserViewModel, CreateProjectViewModel, \
-    AddUserToProjectViewModel
+    AddUserToProjectViewModel, DeleteSubprojectForUser, DeleteSubproject
 
 blueprint = flask.Blueprint('admin', __name__, template_folder='../templates/admin')
 
@@ -19,6 +19,10 @@ def admin_tasks():
             return flask.redirect(flask.url_for('admin.create_project'))
         elif vm.chosen_task == 'add_user_to_project':
             return flask.redirect(flask.url_for('admin.add_user_to_project'))
+        elif vm.chosen_task == 'delete_subproject_for_user':
+            return flask.redirect(flask.url_for('admin.delete_subproject_for_user'))
+        elif vm.chosen_task == 'delete_subproject':
+            return flask.redirect(flask.url_for('admin.delete_subproject'))
         else:
             admin_service.run_task(vm.chosen_task)
     return vm.to_dict()
@@ -52,6 +56,28 @@ def add_user_to_project():
     vm = AddUserToProjectViewModel()
     if vm.validate():
         admin_service.add_users_to_project(vm.usernames, vm.project)
+    elif vm.back:
+        flask.redirect('/admin/tasks')
+    return vm.to_dict()
+
+
+@blueprint.route('/admin/tasks/subproject/delete/user', methods=['GET', 'POST'])
+@response(template_file='delete_subproject_for_user.html')
+def delete_subproject_for_user():
+    vm = DeleteSubprojectForUser()
+    if vm.validate():
+        admin_service.delete_subprojects_for_users(vm.project, vm.subprojects, vm.usernames)
+    elif vm.back:
+        flask.redirect('/admin/tasks')
+    return vm.to_dict()
+
+
+@blueprint.route('/admin/tasks/subproject/delete', methods=['GET', 'POST'])
+@response(template_file='delete_subproject.html')
+def delete_subproject():
+    vm = DeleteSubproject()
+    if vm.validate():
+        admin_service.delete_subprojects(vm.project, vm.subprojects)
     elif vm.back:
         flask.redirect('/admin/tasks')
     return vm.to_dict()

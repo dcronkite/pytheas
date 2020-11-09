@@ -1,3 +1,4 @@
+from pytheas.data.annotations import Annotation
 from pytheas.data.projects import Project
 from pytheas.data.users import User
 from pytheas.tasks.load_data import load_data
@@ -9,6 +10,8 @@ def get_tasks():
         {'value': 'create_user', 'name': 'Create User'},
         {'value': 'create_project', 'name': 'Create Project'},
         {'value': 'add_user_to_project', 'name': 'Add User to Project'},
+        {'value': 'delete_subproject_for_user', 'name': 'Delete Subproject for User'},
+        {'value': 'delete_subproject', 'name': 'Delete Subproject for All Users'},
     ]
 
 
@@ -41,3 +44,37 @@ def create_user(username, email, password):
     user = User(username=username, email=email)
     user.set_password(password)
     user.save()
+
+
+def delete_subproject(project, subproject):
+    Annotation.objects(
+        project=project,
+        subproject=subproject,
+    ).delete()
+    project = Project.objects(project_name=project).first()
+    project.subprojects = [sp for sp in project.subprojects if sp != subproject]
+    project.save()
+
+
+def delete_subprojects(project, subprojects):
+    Annotation.objects(
+        project=project,
+        subproject__in=subprojects,
+    ).delete()
+    project = Project.objects(project_name=project).first()
+    project.subprojects = [sp for sp in project.subprojects if sp not in subprojects]
+    project.save()
+
+
+def delete_subproject_for_user(project, subproject, username):
+    Annotation.objects(
+        project=project,
+        subproject=subproject,
+        username=username
+    ).delete()
+
+
+def delete_subprojects_for_users(project, subprojects, usernames):
+    for subproject in subprojects:
+        for username in usernames:
+            delete_subproject_for_user(project, subproject, username)

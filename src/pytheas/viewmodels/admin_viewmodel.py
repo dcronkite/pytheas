@@ -89,7 +89,8 @@ class AddUserToProjectViewModel(ViewModelBase):
     def __init__(self):
         super().__init__()
         self.form = AddUserToProjectForm()
-        self.form.project_name.choices = [('', '')] + [(name, name) for i, name in enumerate(project_service.get_project_names())]
+        self.form.project_name.choices = [('', '')] + [(name, name) for i, name in
+                                                       enumerate(project_service.get_project_names())]
         self.form.usernames.choices = [('', '')] + [(name, name) for i, name in enumerate(user_service.get_usernames())]
         self.back = self.request_dict.back
         self.errors = []
@@ -108,5 +109,85 @@ class AddUserToProjectViewModel(ViewModelBase):
         if '' in self.usernames:
             return False
         if not self.project:
+            return False
+        return True
+
+
+class DeleteSubprojectForUserForm(FlaskForm):
+    project_name = SelectField('project_name', validators=[InputRequired()])
+    usernames = SelectMultipleField('usernames', validators=[InputRequired()])
+    subprojects = SelectMultipleField('subproject', validators=[InputRequired()])
+
+
+class DeleteSubprojectForUser(ViewModelBase):
+    def __init__(self):
+        super().__init__()
+        self.form = DeleteSubprojectForUserForm()
+        projects = project_service.get_project_names()
+        self.form.project_name.choices = [('', '')] + [(name, name) for i, name in
+                                                       enumerate(projects)]
+        self.form.usernames.choices = [('', '')] + [(name, name) for i, name in enumerate(user_service.get_usernames())]
+        self.form.subprojects.choices = [('', '')] + [
+            (name, name) for i, name in enumerate(sp['name'] for p in projects for sp in project_service.get_subprojects(p))
+        ]
+        self.back = self.request_dict.back
+        self.errors = []
+
+    @property
+    def project(self):
+        return self.form.project_name.data
+
+    @property
+    def usernames(self):
+        return self.form.usernames.data
+
+    @property
+    def subprojects(self):
+        return self.form.subproject.data
+
+    def validate(self):
+        if not self.form.validate():
+            return False
+        if '' in self.usernames:
+            return False
+        if not self.project:
+            return False
+        if not self.subprojects:
+            return False
+        return True
+
+
+class DeleteSubprojectForm(FlaskForm):
+    project_name = SelectField('project_name', validators=[InputRequired()])
+    subprojects = SelectMultipleField('subproject', validators=[InputRequired()])
+
+
+class DeleteSubproject(ViewModelBase):
+    def __init__(self):
+        super().__init__()
+        self.form = DeleteSubprojectForm()
+        projects = project_service.get_project_names()
+        self.form.project_name.choices = [('', '')] + [(name, name) for i, name in
+                                                       enumerate(projects)]
+        self.form.subprojects.choices = [('', '')] + [
+            (name, name) for i, name in enumerate(sp['name'] for p in projects for sp in project_service.get_subprojects(p))
+        ]
+        self.back = self.request_dict.back
+        self.errors = []
+
+    @property
+    def project(self):
+        return self.form.project_name.data
+
+    @property
+    def subprojects(self):
+        return self.form.subprojects.data
+
+    def validate(self):
+        if not self.form.validate():
+            return False
+        if not self.project:
+            return False
+        if not self.subprojects:
             return False
         return True
